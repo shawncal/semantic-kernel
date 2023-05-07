@@ -207,12 +207,7 @@ public sealed class Kernel : IKernel, IDisposable
     /// <inheritdoc/>
     public ISKFunction Func(string skillName, string functionName)
     {
-        if (this.Skills.HasNativeFunction(skillName, functionName))
-        {
-            return this.Skills.GetNativeFunction(skillName, functionName);
-        }
-
-        return this.Skills.GetSemanticFunction(skillName, functionName);
+        return this.Skills.GetFunction(skillName, functionName);
     }
 
     /// <inheritdoc/>
@@ -233,7 +228,7 @@ public sealed class Kernel : IKernel, IDisposable
 
         if (typeof(T) == typeof(ITextCompletion))
         {
-            if (name == null) { name = this.Config.DefaultServiceId; }
+            name ??= this.Config.DefaultServiceId;
 
             if (!this.Config.TextCompletionServices.TryGetValue(name, out Func<IKernel, ITextCompletion> factory))
             {
@@ -246,7 +241,7 @@ public sealed class Kernel : IKernel, IDisposable
 
         if (typeof(T) == typeof(IEmbeddingGeneration<string, float>))
         {
-            if (name == null) { name = this.Config.DefaultServiceId; }
+            name ??= this.Config.DefaultServiceId;
 
             if (!this.Config.TextEmbeddingGenerationServices.TryGetValue(name, out Func<IKernel, IEmbeddingGeneration<string, float>> factory))
             {
@@ -259,7 +254,7 @@ public sealed class Kernel : IKernel, IDisposable
 
         if (typeof(T) == typeof(IChatCompletion))
         {
-            if (name == null) { name = this.Config.DefaultServiceId; }
+            name ??= this.Config.DefaultServiceId;
 
             if (!this.Config.ChatCompletionServices.TryGetValue(name, out Func<IKernel, IChatCompletion> factory))
             {
@@ -272,7 +267,7 @@ public sealed class Kernel : IKernel, IDisposable
 
         if (typeof(T) == typeof(IImageGeneration))
         {
-            if (name == null) { name = this.Config.DefaultServiceId; }
+            name ??= this.Config.DefaultServiceId;
 
             if (!this.Config.ImageGenerationServices.TryGetValue(name, out Func<IKernel, IImageGeneration> factory))
             {
