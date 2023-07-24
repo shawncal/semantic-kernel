@@ -4,6 +4,7 @@
     <AssemblyName>Microsoft.SemanticKernel.Abstractions</AssemblyName>
     <RootNamespace>Microsoft.SemanticKernel</RootNamespace>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <NoWarn>IDE0130</NoWarn>
   </PropertyGroup>
 
   <Import Project="$(RepoRoot)/dotnet/nuget/nuget-package.props" />
@@ -16,9 +17,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" />
-    <PackageReference Include="Microsoft.Bcl.HashCode" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
+    <PackageReference Include="Microsoft.Extensions.Primitives" />
+    <PackageReference Include="System.Collections.Immutable" />
+    <PackageReference Include="System.Memory.Data" />
     <PackageReference Include="System.Text.Json" />
   </ItemGroup>
 

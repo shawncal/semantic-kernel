@@ -1,0 +1,139 @@
+﻿// Copyright (c) Microsoft. All rights reserved.
+
+using System;
+using System.IO;
+using System.Net;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.SemanticKernel.Context.Serialization;
+
+namespace Microsoft.SemanticKernel.Context.Extensions;
+
+/// <summary>
+/// Provides extension methods to work with an <see cref="FunctionRequestData"/> instance.
+/// </summary>
+public static class FunctionRequestDataExtensions
+{
+    /// <summary>
+    /// Reads the body payload as a string.
+    /// </summary>
+    /// <param name="request">The request from which to read.</param>
+    /// <param name="encoding">The encoding to use when reading the string. Defaults to UTF-8</param>
+    /// <returns>A <see cref="Task{String}"/> that represents the asynchronous read operation.</returns>
+    public static async Task<string?> ReadAsStringAsync(this FunctionRequestData request, Encoding? encoding = null)
+    {
+        if (request is null)
+        {
+            throw new ArgumentNullException(nameof(request));
+        }
+
+        if (request.Body is null)
+        {
+            return null;
+        }
+
+        using (var reader = new StreamReader(request.Body, bufferSize: 1024, detectEncodingFromByteOrderMarks: true, encoding: encoding, leaveOpen: true))
+        {
+            return await reader.ReadToEndAsync().ConfigureAwait(false);
+        }
+    }
+
+    /// <summary>
+    /// Reads the body payload as a string.
+    /// </summary>
+    /// <param name="request">The request from which to read.</param>
+    /// <param name="encoding">The encoding to use when reading the string. Defaults to UTF-8</param>
+    /// <returns>A <see cref="string"/> that represents request body.</returns>
+    public static string? ReadAsString(this FunctionRequestData request, Encoding? encoding = null)
+    {
+        if (request is null)
+        {
+            throw new ArgumentNullException(nameof(request));
+        }
+
+        if (request.Body is null)
+        {
+            return null;
+        }
+
+        using (var reader = new StreamReader(request.Body, bufferSize: 1024, detectEncodingFromByteOrderMarks: true, encoding: encoding, leaveOpen: true))
+        {
+            return reader.ReadToEnd();
+        }
+    }
+
+    /// <summary>
+    /// Reads the request using the default <see cref="ObjectSerializer"/> configured for this worker.
+    /// </summary>
+    /// <typeparam name="T">The target type of the JSON value.</typeparam>
+    /// <param name="request">The request to be read.</param>
+    /// <param name="cancellationToken">A token that may be used to cancel the read operation.</param>
+    /// <returns>A <see cref="ValueTask{T}"/> representing the asynchronous operation.</returns>
+    public static ValueTask<T?> ReadFromJsonAsync<T>(this FunctionRequestData request, CancellationToken cancellationToken = default)
+    {
+        if (request is null)
+        {
+            throw new ArgumentNullException(nameof(request));
+        }
+
+        ObjectSerializer serializer = request.FunctionContext.InstanceServices.GetService<WorkerOptions>()?.Serializer
+             ?? throw new InvalidOperationException("A serializer is not configured for the worker.");
+
+        return ReadFromJsonAsync<T>(request, serializer, cancellationToken);
+    }
+
+    /// <summary>
+    /// Reads the request using the provided <see cref="ObjectSerializer"/>.
+    /// </summary>
+    /// <typeparam name="T">The target type of the JSON value.</typeparam>
+    /// <param name="request">The request to be read.</param>
+    /// <param name="serializer">The <see cref="ObjectSerializer"/> to use for the deserialization.</param>
+    /// <param name="cancellationToken">A token that may be used to cancel the read operation.</param>
+    /// <returns>A <see cref="ValueTask{T}"/> representing the asynchronous operation.</returns>
+    public static ValueTask<T?> ReadFromJsonAsync<T>(this FunctionRequestData request, ObjectSerializer serializer, CancellationToken cancellationToken = default)
+    {
+        if (request is null)
+        {
+            throw new ArgumentNullException(nameof(request));
+        }
+
+        if (serializer is null)
+        {
+            throw new ArgumentNullException(nameof(serializer));
+        }
+
+        ValueTask<object?> result = serializer.DeserializeAsync(request.Body, typeof(T), cancellationToken);
+
+        static T? TryCast(object? value)
+        {
+            return value != null
+                ? (T)value
+                : default;
+        }
+
+        if (result.IsCompletedSuccessfully)
+        {
+            return new ValueTask<T?>(TryCast(result.Result));
+        }
+
+#pragma warning disable CA2008 // Do not create tasks without passing a TaskScheduler
+        return new ValueTask<T?>(result.AsTask().ContinueWith(t => TryCast(t.Result)));
+#pragma warning restore CA2008 // Do not create tasks without passing a TaskScheduler
+    }
+
+    /// <summary>
+    /// Creates a response for the the provided <see cref="FunctionRequestData"/>.
+    /// </summary>
+    /// <param name="request">The <see cref="FunctionRequestData"/> for this response.</param>
+    /// <param name="statusCode">The response status code.</param>
+    /// <returns>The response data.</returns>
+    public static FunctionResponseData CreateResponse(this FunctionRequestData request, HttpStatusCode statusCode)
+    {
+        var response = request.CreateResponse();
+        response.StatusCode = statusCode;
+
+        return response;
+    }
+}
