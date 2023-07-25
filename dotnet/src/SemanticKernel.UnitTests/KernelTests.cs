@@ -166,7 +166,7 @@ public class KernelTests
             Console.WriteLine("Hello folks!");
         }
 
-        [SKFunction, Description("Export info."), SKName("ReadSkillCollectionAsync")]
+        [SKFunction, Description("Export info.")]
         public async Task<SKContext> ReadSkillCollectionAsync(SKContext context)
         {
             await Task.Delay(0);

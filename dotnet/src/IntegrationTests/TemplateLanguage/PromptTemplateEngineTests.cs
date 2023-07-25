@@ -170,7 +170,7 @@ public sealed class PromptTemplateEngineTests : IDisposable
             return input == "123" ? "123 ok" : input + " != 123";
         }
 
-        [SKFunction, Description("This is a test"), SKName("asis")]
+        [SKFunction("asis"), Description("This is a test")]
         public string MyFunction2(string input)
         {
             return input;

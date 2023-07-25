@@ -384,15 +384,25 @@ public sealed class SKFunction : ISKFunction, IDisposable
     {
         Verify.NotNull(method);
 
-        // Get the name to use for the function.  If the function has an SKName attribute, we use that.
-        // Otherwise, we use the name of the method, but strip off any "Async" suffix if it's {Value}Task-returning.
+        SKFunctionAttribute? functionAttribute = method.GetCustomAttribute<SKFunctionAttribute>(inherit: true);
+
+        // Get the name to use for the function.
+        // First, look for a name override provided in the SKFunction attribute.
+        string? functionName = functionAttribute?.Name;
+
+        // If the SKName attribute is provided, we use that as the function name.
         // We don't apply any heuristics to the value supplied by SKName so that it can always be used
         // as a definitive override.
-        string? functionName = method.GetCustomAttribute<SKNameAttribute>(inherit: true)?.Name?.Trim();
-        if (string.IsNullOrEmpty(functionName))
+        string? skNameValue = method.GetCustomAttribute<SKNameAttribute>(inherit: true)?.Name;
+        if (skNameValue != null) // Check for null only - if empty is provided, this is invalid code and should throw.
+        {
+            functionName = skNameValue;
+        }
+
+        // If no name override was provided, use the method name, removing the "Async" suffix if it's {Value}Task-returning.
+        if (functionName == null) // Check for null only - if empty is provided, this is invalid code and should throw.
         {
             functionName = SanitizeMetadataName(method.Name!);
-            Verify.ValidFunctionName(functionName);
 
             if (IsAsyncMethod(method) &&
                 functionName.EndsWith("Async", StringComparison.Ordinal) &&
@@ -402,7 +412,7 @@ public sealed class SKFunction : ISKFunction, IDisposable
             }
         }
 
-        SKFunctionAttribute? functionAttribute = method.GetCustomAttribute<SKFunctionAttribute>(inherit: true);
+        Verify.ValidFunctionName(functionName);
 
         string? description = method.GetCustomAttribute<DescriptionAttribute>(inherit: true)?.Description;
 

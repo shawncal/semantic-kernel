@@ -55,4 +55,16 @@ public sealed class SKFunctionAttribute : Attribute
     public SKFunctionAttribute()
     {
     }
+
+    /// <summary>
+    /// Initializes the attribute with the specified function name.
+    /// </summary>
+    /// <param name="name"></param>
+    public SKFunctionAttribute(string name)
+        => this.Name = name;
+
+    /// <summary>
+    /// Gets the name of the function.
+    /// </summary>
+    public string? Name { get; }
 }

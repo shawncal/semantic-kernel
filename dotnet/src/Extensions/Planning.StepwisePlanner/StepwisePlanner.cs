@@ -94,12 +94,10 @@ public class StepwisePlanner : IStepwisePlanner
         return plan;
     }
 
-    [SKFunction, SKName("ExecutePlan"), Description("Execute a plan")]
+    [SKFunction("ExecutePlan"), Description("Execute a plan")]
     public async Task<SKContext> ExecutePlanAsync(
-        [Description("The question to answer")]
-        string question,
-        [Description("List of tool descriptions")]
-        string functionDescriptions,
+        [Description("The question to answer")] string question,
+        [Description("List of tool descriptions")] string functionDescriptions,
         SKContext context)
     {
         var stepsTaken = new List<SystemStep>();
