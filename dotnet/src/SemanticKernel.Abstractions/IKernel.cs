@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Threading;
 using System.Threading.Tasks;
@@ -50,15 +49,6 @@ public interface IKernel
     /// <param name="skFunction">The <see cref="ISKFunction"/> function to register.</param>
     /// <returns>A C# function wrapping the function execution logic.</returns>
     ISKFunction RegisterFunction(ISKFunction skFunction);
-
-    /// <summary>
-    /// Import a set of functions from the given skill. The functions must have the `SKFunction` attribute.
-    /// Once these functions are imported, the prompt templates can use functions to import content at runtime.
-    /// </summary>
-    /// <param name="skillInstance">Instance of a class containing functions</param>
-    /// <param name="skillName">Name of the skill for skill collection and prompt templates. If the value is empty functions are registered in the global namespace.</param>
-    /// <returns>A list of all the semantic functions found in the directory, indexed by function name.</returns>
-    IDictionary<string, ISKFunction> ImportSkill(object skillInstance, string? skillName = null);
 
     /// <summary>
     /// Set the semantic memory to use

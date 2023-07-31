@@ -15,7 +15,12 @@ using Microsoft.SemanticKernel.Diagnostics;
 using Microsoft.SemanticKernel.Orchestration;
 using Microsoft.SemanticKernel.SkillDefinition;
 
+#pragma warning disable IDE0130 // Namespace does not match folder structure
+
+// TODO: For refactor only. Update namespace to match projec before checkin !!!!!!
+
 namespace Microsoft.SemanticKernel.SemanticFunctions;
+#pragma warning restore IDE0130 // Namespace does not match folder structure
 
 #pragma warning disable format
 
@@ -147,24 +152,9 @@ public sealed class PromptFunction : IPromptFunction, IDisposable
         CompleteRequestSettings? settings = null,
         CancellationToken cancellationToken = default)
     {
-        if (this.IsSemantic)
-        {
-            this.AddDefaultValues(context.Variables);
+        this.AddDefaultValues(context.Variables);
 
-            return await this._function(this._aiService?.Value, settings ?? this._aiRequestSettings, context, cancellationToken).ConfigureAwait(false);
-        }
-
-        try
-        {
-            return await this._function(null, settings, context, cancellationToken).ConfigureAwait(false);
-        }
-        catch (Exception e) when (!e.IsCriticalException())
-        {
-            const string Message = "Something went wrong while executing the native function. Function: {0}. Error: {1}";
-            this._logger.LogError(e, Message, this._function.Method.Name, e.Message);
-            context.LastException = e;
-            return context;
-        }
+        return await this._function(this._aiService?.Value, settings ?? this._aiRequestSettings, context, cancellationToken).ConfigureAwait(false);
     }
 
     /// <inheritdoc/>

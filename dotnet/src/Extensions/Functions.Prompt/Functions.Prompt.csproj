@@ -1,9 +1,9 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <!-- THIS PROPERTY GROUP MUST COME FIRST -->
-    <AssemblyName>Microsoft.SemanticKernel.Skills.Core</AssemblyName>
-    <RootNamespace>$(AssemblyName)</RootNamespace>
+    <AssemblyName>Microsoft.SemanticKernel.Functions.Prompt</AssemblyName>
+    <RootNamespace>Microsoft.SemanticKernel.Functions.Prompt</RootNamespace>
     <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
 
@@ -12,12 +12,12 @@
 
   <PropertyGroup>
     <!-- NuGet Package Settings -->
-    <Title>Semantic Kernel - Core Skills</Title>
-    <Description>Semantic Kernel core skills.</Description>
+    <Title>Semantic Kernel - Prompt Functions</Title>
+    <Description>Semantic Kernel Prompt Functions</Description>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Extensions\Functions.Prompt\Functions.Prompt.csproj" />
+    <ProjectReference Include="..\..\SemanticKernel.Abstractions\SemanticKernel.Abstractions.csproj" />
     <ProjectReference Include="..\..\SemanticKernel\SemanticKernel.csproj" />
   </ItemGroup>
 

@@ -5,10 +5,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\dotnet\src\SemanticKernel\SemanticKernel.csproj" />
+    <PackageReference Include="CoreCLR-NCalc" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="CoreCLR-NCalc"/>
+    <ProjectReference Include="..\..\src\SemanticKernel.MetaPackage\SemanticKernel.MetaPackage.csproj" />
   </ItemGroup>
 </Project>

@@ -9,10 +9,11 @@ using Microsoft.SemanticKernel.Diagnostics;
 using Microsoft.SemanticKernel.Orchestration;
 using Microsoft.SemanticKernel.SkillDefinition;
 using Microsoft.Extensions.Logging;
+using Microsoft.SemanticKernel.SemanticFunctions;
 
 #pragma warning disable IDE0130
 // ReSharper disable once CheckNamespace - Using the namespace of IKernel
-namespace Microsoft.SemanticKernel.SemanticFunctions;
+namespace Microsoft.SemanticKernel;
 #pragma warning restore IDE0130
 
 /// <summary>
@@ -27,7 +28,7 @@ public static class InlineFunctionsDefinitionExtension
     }
 
     /// <inheritdoc/>
-    public static IPromptFunction RegisterSemanticFunction(this IKernel kernel, string skillName, string functionName, SemanticFunctionConfig functionConfig)
+    public static IPromptFunction RegisterSemanticFunction(this IKernel kernel, string? skillName, string functionName, SemanticFunctionConfig functionConfig)
     {
         // Future-proofing the name not to contain special chars
         Verify.ValidSkillName(skillName);

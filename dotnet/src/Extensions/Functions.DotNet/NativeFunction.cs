@@ -15,12 +15,11 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
-using Microsoft.SemanticKernel.AI.TextCompletion;
 using Microsoft.SemanticKernel.Diagnostics;
 using Microsoft.SemanticKernel.Orchestration;
 using Microsoft.SemanticKernel.SkillDefinition;
 
-namespace Microsoft.SemanticKernel.NativeFunctions;
+namespace Microsoft.SemanticKernel.Functions.DotNet;
 
 #pragma warning disable format
 
@@ -143,7 +142,7 @@ public sealed class NativeFunction : ISKFunction, IDisposable
         {
             const string Message = "Something went wrong while executing the native function. Function: {0}. Error: {1}";
             this._logger.LogError(e, Message, this._function.Method.Name, e.Message);
-            context.LastException = e;
+            //context.LastException = e; TODO: Resolve this before checkin
             return context;
         }
     }
@@ -188,12 +187,6 @@ public sealed class NativeFunction : ISKFunction, IDisposable
         public List<ParameterView> Parameters { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
-    }
-
-    private static async Task<string> GetCompletionsResultContentAsync(IReadOnlyList<ITextResult> completions, CancellationToken cancellationToken = default)
-    {
-        // To avoid any unexpected behavior we only take the first completion result (when running from the Kernel)
-        return await completions[0].GetCompletionAsync(cancellationToken).ConfigureAwait(false);
     }
 
     internal NativeFunction(
