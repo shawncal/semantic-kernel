@@ -17,6 +17,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\Extensions\Functions.DotNet\Functions.DotNet.csproj" />
     <ProjectReference Include="..\..\Extensions\Functions.Prompt\Functions.Prompt.csproj" />
     <ProjectReference Include="..\..\SemanticKernel\SemanticKernel.csproj" />
   </ItemGroup>

@@ -8,7 +8,9 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.SemanticKernel.Orchestration;
 
+#pragma warning disable IDE0130 // Namespace does not match folder structure
 namespace Microsoft.SemanticKernel.SkillDefinition;
+#pragma warning restore IDE0130 // Namespace does not match folder structure
 
 /// <summary>
 /// Specifies that a method is a native function available to Semantic Kernel.

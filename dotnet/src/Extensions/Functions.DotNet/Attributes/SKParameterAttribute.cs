@@ -2,7 +2,9 @@
 
 using System;
 
+#pragma warning disable IDE0130 // Namespace does not match folder structure
 namespace Microsoft.SemanticKernel.SkillDefinition;
+#pragma warning restore IDE0130 // Namespace does not match folder structure
 
 /// <summary>
 /// Attribute to describe additional parameters used by a native function that aren't part of its method signature.
