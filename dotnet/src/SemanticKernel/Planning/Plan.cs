@@ -304,7 +304,6 @@ public sealed class Plan : IPlan
     /// <inheritdoc/>
     public async Task<SKContext> InvokeAsync(
         SKContext context,
-        CompleteRequestSettings? settings = null,
         CancellationToken cancellationToken = default)
     {
         if (this.Function is not null)
@@ -312,7 +311,7 @@ public sealed class Plan : IPlan
             AddVariablesToContext(this.State, context);
             var result = await this.Function
                 .WithInstrumentation(context.Logger)
-                .InvokeAsync(context, settings, cancellationToken)
+                .InvokeAsync(context, cancellationToken)
                 .ConfigureAwait(false);
 
             if (result.ErrorOccurred)
@@ -342,22 +341,6 @@ public sealed class Plan : IPlan
         return this.Function is null
             ? throw new NotImplementedException()
             : this.Function.SetDefaultSkillCollection(skills);
-    }
-
-    /// <inheritdoc/>
-    public ISKFunction SetAIService(Func<ITextCompletion> serviceFactory)
-    {
-        return this.Function is null
-            ? throw new NotImplementedException()
-            : this.Function.SetAIService(serviceFactory);
-    }
-
-    /// <inheritdoc/>
-    public ISKFunction SetAIConfiguration(CompleteRequestSettings settings)
-    {
-        return this.Function is null
-            ? throw new NotImplementedException()
-            : this.Function.SetAIConfiguration(settings);
     }
 
     #endregion ISKFunction implementation
@@ -571,8 +554,6 @@ public sealed class Plan : IPlan
         this.Name = function.Name;
         this.SkillName = function.SkillName;
         this.Description = function.Description;
-        this.IsSemantic = function.IsSemantic;
-        this.RequestSettings = function.RequestSettings;
     }
 
     private ISKFunction? Function { get; set; } = null;

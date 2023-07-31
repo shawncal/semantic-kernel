@@ -7,7 +7,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
-using Microsoft.SemanticKernel.AI.TextCompletion;
 using Microsoft.SemanticKernel.Orchestration;
 using Microsoft.SemanticKernel.SkillDefinition;
 
@@ -26,12 +25,6 @@ public sealed class InstrumentedPlan : IPlan
 
     /// <inheritdoc/>
     public string Description => this._plan.Description;
-
-    /// <inheritdoc/>
-    public bool IsSemantic => this._plan.IsSemantic;
-
-    /// <inheritdoc/>
-    public CompleteRequestSettings RequestSettings => this._plan.RequestSettings;
 
     /// <summary>
     /// Initialize a new instance of the <see cref="InstrumentedPlan"/> class.
@@ -55,20 +48,11 @@ public sealed class InstrumentedPlan : IPlan
     /// <inheritdoc/>
     public async Task<SKContext> InvokeAsync(
         SKContext context,
-        CompleteRequestSettings? settings = null,
         CancellationToken cancellationToken = default)
     {
         return await this.InvokeWithInstrumentationAsync(() =>
-            this._plan.InvokeAsync(context, settings, cancellationToken)).ConfigureAwait(false);
+            this._plan.InvokeAsync(context, cancellationToken)).ConfigureAwait(false);
     }
-
-    /// <inheritdoc/>
-    public ISKFunction SetAIConfiguration(CompleteRequestSettings settings) =>
-        this._plan.SetAIConfiguration(settings);
-
-    /// <inheritdoc/>
-    public ISKFunction SetAIService(Func<ITextCompletion> serviceFactory) =>
-        this._plan.SetAIService(serviceFactory);
 
     /// <inheritdoc/>
     public ISKFunction SetDefaultSkillCollection(IReadOnlySkillCollection skills) =>
