@@ -8,7 +8,6 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.SemanticKernel.Memory;
 using Microsoft.SemanticKernel.Orchestration;
-using Microsoft.SemanticKernel.SemanticFunctions;
 using Microsoft.SemanticKernel.Services;
 using Microsoft.SemanticKernel.SkillDefinition;
 using Microsoft.SemanticKernel.TemplateEngine;
@@ -46,33 +45,11 @@ public interface IKernel
     IReadOnlySkillCollection Skills { get; }
 
     /// <summary>
-    /// Build and register a function in the internal skill collection, in a global generic skill.
-    /// </summary>
-    /// <param name="functionName">Name of the semantic function. The name can contain only alphanumeric chars + underscore.</param>
-    /// <param name="functionConfig">Function configuration, e.g. I/O params, AI settings, localization details, etc.</param>
-    /// <returns>A C# function wrapping AI logic, usually defined with natural language</returns>
-    ISKFunction RegisterSemanticFunction(
-        string functionName,
-        SemanticFunctionConfig functionConfig);
-
-    /// <summary>
-    /// Build and register a function in the internal skill collection.
-    /// </summary>
-    /// <param name="skillName">Name of the skill containing the function. The name can contain only alphanumeric chars + underscore.</param>
-    /// <param name="functionName">Name of the semantic function. The name can contain only alphanumeric chars + underscore.</param>
-    /// <param name="functionConfig">Function configuration, e.g. I/O params, AI settings, localization details, etc.</param>
-    /// <returns>A C# function wrapping AI logic, usually defined with natural language</returns>
-    ISKFunction RegisterSemanticFunction(
-        string skillName,
-        string functionName,
-        SemanticFunctionConfig functionConfig);
-
-    /// <summary>
     /// Registers a custom function in the internal skill collection.
     /// </summary>
-    /// <param name="customFunction">The custom function to register.</param>
+    /// <param name="skFunction">The <see cref="ISKFunction"/> function to register.</param>
     /// <returns>A C# function wrapping the function execution logic.</returns>
-    ISKFunction RegisterCustomFunction(ISKFunction customFunction);
+    ISKFunction RegisterFunction(ISKFunction skFunction);
 
     /// <summary>
     /// Import a set of functions from the given skill. The functions must have the `SKFunction` attribute.
@@ -203,6 +180,16 @@ public interface IKernel
     [Obsolete("SKContext no longer contains the CancellationToken. Use CreateNewContext().")]
     [EditorBrowsable(EditorBrowsableState.Never)]
     SKContext CreateNewContext(CancellationToken cancellationToken);
+
+
+    /// <summary>
+    /// Registers a custom function in the internal skill collection.
+    /// </summary>
+    /// <param name="customFunction">The custom function to register.</param>
+    /// <returns>A C# function wrapping the function execution logic.</returns>
+    [Obsolete("Use RegisterFunction instead. This will be removed in a future release.")]
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    ISKFunction RegisterCustomFunction(ISKFunction customFunction);
 
     #endregion
 }

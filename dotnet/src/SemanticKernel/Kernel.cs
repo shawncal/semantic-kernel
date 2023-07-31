@@ -7,12 +7,10 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using Microsoft.SemanticKernel.AI;
-using Microsoft.SemanticKernel.AI.TextCompletion;
 using Microsoft.SemanticKernel.Diagnostics;
 using Microsoft.SemanticKernel.Memory;
+using Microsoft.SemanticKernel.NativeFunctions;
 using Microsoft.SemanticKernel.Orchestration;
-using Microsoft.SemanticKernel.SemanticFunctions;
 using Microsoft.SemanticKernel.Services;
 using Microsoft.SemanticKernel.SkillDefinition;
 using Microsoft.SemanticKernel.TemplateEngine;
@@ -80,25 +78,6 @@ public sealed class Kernel : IKernel, IDisposable
     }
 
     /// <inheritdoc/>
-    public ISKFunction RegisterSemanticFunction(string functionName, SemanticFunctionConfig functionConfig)
-    {
-        return this.RegisterSemanticFunction(SkillCollection.GlobalSkill, functionName, functionConfig);
-    }
-
-    /// <inheritdoc/>
-    public ISKFunction RegisterSemanticFunction(string skillName, string functionName, SemanticFunctionConfig functionConfig)
-    {
-        // Future-proofing the name not to contain special chars
-        Verify.ValidSkillName(skillName);
-        Verify.ValidFunctionName(functionName);
-
-        ISKFunction function = this.CreateSemanticFunction(skillName, functionName, functionConfig);
-        this._skillCollection.AddFunction(function);
-
-        return function;
-    }
-
-    /// <inheritdoc/>
     public IDictionary<string, ISKFunction> ImportSkill(object skillInstance, string? skillName = null)
     {
         Verify.NotNull(skillInstance);
@@ -128,14 +107,14 @@ public sealed class Kernel : IKernel, IDisposable
     }
 
     /// <inheritdoc/>
-    public ISKFunction RegisterCustomFunction(ISKFunction customFunction)
+    public ISKFunction RegisterFunction(ISKFunction skFunction)
     {
-        Verify.NotNull(customFunction);
+        Verify.NotNull(skFunction);
 
-        customFunction.SetDefaultSkillCollection(this.Skills);
-        this._skillCollection.AddFunction(customFunction);
+        skFunction.SetDefaultSkillCollection(this.Skills);
+        this._skillCollection.AddFunction(skFunction);
 
-        return customFunction;
+        return skFunction;
     }
 
     /// <inheritdoc/>
@@ -260,37 +239,6 @@ public sealed class Kernel : IKernel, IDisposable
     private readonly IPromptTemplateEngine _promptTemplateEngine;
     private readonly IAIServiceProvider _aiServiceProvider;
 
-    private ISKFunction CreateSemanticFunction(
-        string skillName,
-        string functionName,
-        SemanticFunctionConfig functionConfig)
-    {
-        if (!functionConfig.PromptTemplateConfig.Type.Equals("completion", StringComparison.OrdinalIgnoreCase))
-        {
-            throw new AIException(
-                AIException.ErrorCodes.FunctionTypeNotSupported,
-                $"Function type not supported: {functionConfig.PromptTemplateConfig}");
-        }
-
-        ISKFunction func = SKFunction.FromSemanticConfig(
-            skillName,
-            functionName,
-            functionConfig,
-            this.Logger
-        );
-
-        // Connect the function to the current kernel skill collection, in case the function
-        // is invoked manually without a context and without a way to find other functions.
-        func.SetDefaultSkillCollection(this.Skills);
-
-        func.SetAIConfiguration(CompleteRequestSettings.FromCompletionConfig(functionConfig.PromptTemplateConfig.Completion));
-
-        // Note: the service is instantiated using the kernel configuration state when the function is invoked
-        func.SetAIService(() => this.GetService<ITextCompletion>());
-
-        return func;
-    }
-
     /// <summary>
     /// Import a skill into the kernel skill collection, so that semantic functions and pipelines can consume its functions.
     /// </summary>
@@ -309,7 +257,7 @@ public sealed class Kernel : IKernel, IDisposable
         {
             if (method.GetCustomAttribute<SKFunctionAttribute>() is not null)
             {
-                ISKFunction function = SKFunction.FromNativeMethod(method, skillInstance, skillName, logger);
+                ISKFunction function = NativeFunction.FromNativeMethod(method, skillInstance, skillName, logger);
                 if (result.ContainsKey(function.Name))
                 {
                     throw new KernelException(
@@ -345,6 +293,19 @@ public sealed class Kernel : IKernel, IDisposable
     public SKContext CreateNewContext(CancellationToken cancellationToken)
     {
         return this.CreateNewContext();
+    }
+
+    /// <inheritdoc/>
+    [Obsolete("Use RegsiterFunction instead. This will be removed in a future release.")]
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public ISKFunction RegisterCustomFunction(ISKFunction customFunction)
+    {
+        Verify.NotNull(customFunction);
+
+        customFunction.SetDefaultSkillCollection(this.Skills);
+        this._skillCollection.AddFunction(customFunction);
+
+        return customFunction;
     }
 
     #endregion

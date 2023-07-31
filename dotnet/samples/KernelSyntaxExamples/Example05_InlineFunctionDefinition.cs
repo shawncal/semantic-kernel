@@ -3,6 +3,7 @@
 using System;
 using System.Threading.Tasks;
 using Microsoft.SemanticKernel;
+using Microsoft.SemanticKernel.SemanticFunctions;
 using RepoUtils;
 
 // ReSharper disable once InconsistentNaming

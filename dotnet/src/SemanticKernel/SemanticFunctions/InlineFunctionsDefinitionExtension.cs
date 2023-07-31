@@ -4,14 +4,15 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.SemanticKernel.AI;
 using Microsoft.SemanticKernel.Diagnostics;
 using Microsoft.SemanticKernel.Orchestration;
-using Microsoft.SemanticKernel.SemanticFunctions;
 using Microsoft.SemanticKernel.SkillDefinition;
+using Microsoft.Extensions.Logging;
 
 #pragma warning disable IDE0130
 // ReSharper disable once CheckNamespace - Using the namespace of IKernel
-namespace Microsoft.SemanticKernel;
+namespace Microsoft.SemanticKernel.SemanticFunctions;
 #pragma warning restore IDE0130
 
 /// <summary>
@@ -19,6 +20,48 @@ namespace Microsoft.SemanticKernel;
 /// </summary>
 public static class InlineFunctionsDefinitionExtension
 {
+    /// <inheritdoc/>
+    public static IPromptFunction RegisterSemanticFunction(this IKernel kernel, string functionName, SemanticFunctionConfig functionConfig)
+    {
+        return kernel.RegisterSemanticFunction(SkillCollection.GlobalSkill, functionName, functionConfig);
+    }
+
+    /// <inheritdoc/>
+    public static IPromptFunction RegisterSemanticFunction(this IKernel kernel, string skillName, string functionName, SemanticFunctionConfig functionConfig)
+    {
+        // Future-proofing the name not to contain special chars
+        Verify.ValidSkillName(skillName);
+        Verify.ValidFunctionName(functionName);
+
+        IPromptFunction function = CreateSemanticFunction(skillName, functionName, functionConfig, kernel.Logger);
+        kernel.RegisterFunction(function);
+
+        return function;
+    }
+
+    private static IPromptFunction CreateSemanticFunction(
+        string skillName,
+        string functionName,
+        SemanticFunctionConfig functionConfig,
+        ILogger? logger)
+    {
+        if (!functionConfig.PromptTemplateConfig.Type.Equals("completion", StringComparison.OrdinalIgnoreCase))
+        {
+            throw new AIException(
+                AIException.ErrorCodes.FunctionTypeNotSupported,
+                $"Function type not supported: {functionConfig.PromptTemplateConfig}");
+        }
+
+        IPromptFunction func = PromptFunction.FromSemanticConfig(
+            skillName,
+            functionName,
+            functionConfig,
+            logger
+        );
+
+        return func;
+    }
+
     /// <summary>
     /// Define a string-to-string semantic function, with no direct support for input context.
     /// The function can be referenced in templates and will receive the context, but when invoked programmatically you
@@ -36,7 +79,7 @@ public static class InlineFunctionsDefinitionExtension
     /// <param name="frequencyPenalty">Frequency Penalty parameter passed to LLM</param>
     /// <param name="stopSequences">Strings the LLM will detect to stop generating (before reaching max tokens)</param>
     /// <returns>A function ready to use</returns>
-    public static ISKFunction CreateSemanticFunction(
+    public static IPromptFunction CreateSemanticFunction(
         this IKernel kernel,
         string promptTemplate,
         string? functionName = null,
@@ -83,7 +126,7 @@ public static class InlineFunctionsDefinitionExtension
     /// <param name="skillName">An optional skill name, e.g. to namespace functions with the same name. When empty,
     /// the function is added to the global namespace, overwriting functions with the same name</param>
     /// <returns>A function ready to use</returns>
-    public static ISKFunction CreateSemanticFunction(
+    public static IPromptFunction CreateSemanticFunction(
         this IKernel kernel,
         string promptTemplate,
         PromptTemplateConfig config,

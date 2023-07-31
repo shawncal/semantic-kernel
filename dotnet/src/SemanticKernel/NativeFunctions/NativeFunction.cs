@@ -18,8 +18,9 @@ using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.SemanticKernel.AI.TextCompletion;
 using Microsoft.SemanticKernel.Diagnostics;
 using Microsoft.SemanticKernel.Orchestration;
+using Microsoft.SemanticKernel.SkillDefinition;
 
-namespace Microsoft.SemanticKernel.SkillDefinition;
+namespace Microsoft.SemanticKernel.NativeFunctions;
 
 #pragma warning disable format
 
@@ -29,7 +30,7 @@ namespace Microsoft.SemanticKernel.SkillDefinition;
 /// with additional methods required by the kernel.
 /// </summary>
 [DebuggerDisplay("{DebuggerDisplay,nq}")]
-public sealed class SKFunction : ISKFunction, IDisposable
+public sealed class NativeFunction : ISKFunction, IDisposable
 {
     /// <inheritdoc/>
     public string Name { get; }
@@ -71,7 +72,7 @@ public sealed class SKFunction : ISKFunction, IDisposable
 
         MethodDetails methodDetails = GetMethodDetails(method, target, logger);
 
-        return new SKFunction(
+        return new NativeFunction(
             delegateFunction: methodDetails.Function,
             parameters: methodDetails.Parameters,
             skillName: skillName!,
@@ -108,9 +109,9 @@ public sealed class SKFunction : ISKFunction, IDisposable
             skillName = SkillCollection.GlobalSkill;
         }
 
-        return new SKFunction(
+        return new NativeFunction(
             delegateFunction: methodDetails.Function,
-            parameters: parameters is not null ? parameters.ToList() : (IList<ParameterView>)Array.Empty<ParameterView>(),
+            parameters: parameters is not null ? parameters.ToList() : Array.Empty<ParameterView>(),
             description: description,
             skillName: skillName!,
             functionName: functionName,
@@ -195,7 +196,7 @@ public sealed class SKFunction : ISKFunction, IDisposable
         return await completions[0].GetCompletionAsync(cancellationToken).ConfigureAwait(false);
     }
 
-    internal SKFunction(
+    internal NativeFunction(
         Func<SKContext, CancellationToken, Task<SKContext>> delegateFunction,
         IList<ParameterView> parameters,
         string skillName,
@@ -352,25 +353,25 @@ public sealed class SKFunction : ISKFunction, IDisposable
         if (type == typeof(SKContext))
         {
             TrackUniqueParameterType(ref hasSKContextParam, method, $"At most one {nameof(SKContext)} parameter is permitted.");
-            return (static (SKContext context, CancellationToken _) => context, null);
+            return (static (context, _) => context, null);
         }
 
         if (type == typeof(ILogger))
         {
             TrackUniqueParameterType(ref hasLoggerParam, method, $"At most one {nameof(ILogger)} parameter is permitted.");
-            return (static (SKContext context, CancellationToken _) => context.Logger, null);
+            return (static (context, _) => context.Logger, null);
         }
 
         if (type == typeof(CultureInfo) || type == typeof(IFormatProvider))
         {
             TrackUniqueParameterType(ref hasCultureParam, method, $"At most one {nameof(CultureInfo)}/{nameof(IFormatProvider)} parameter is permitted.");
-            return (static (SKContext context, CancellationToken _) => context.Culture, null);
+            return (static (context, _) => context.Culture, null);
         }
 
         if (type == typeof(CancellationToken))
         {
             TrackUniqueParameterType(ref hasCancellationTokenParam, method, $"At most one {nameof(CancellationToken)} parameter is permitted.");
-            return (static (SKContext _, CancellationToken cancellationToken) => cancellationToken, null);
+            return (static (_, cancellationToken) => cancellationToken, null);
         }
 
         // Handle context variables. These are supplied from the SKContext's Variables dictionary.
@@ -421,7 +422,7 @@ public sealed class SKFunction : ISKFunction, IDisposable
             }
 
             bool fallBackToInput = !sawFirstParameter && !nameIsInput;
-            Func<SKContext, CancellationToken, object?> parameterFunc = (SKContext context, CancellationToken _) =>
+            Func<SKContext, CancellationToken, object?> parameterFunc = (context, _) =>
             {
                 // 1. Use the value of the variable if it exists.
                 if (context.Variables.TryGetValue(name, out string? value))

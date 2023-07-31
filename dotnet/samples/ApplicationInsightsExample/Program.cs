@@ -16,6 +16,7 @@ using Microsoft.SemanticKernel.Planning;
 using Microsoft.SemanticKernel.Planning.Action;
 using Microsoft.SemanticKernel.Planning.Sequential;
 using Microsoft.SemanticKernel.Planning.Stepwise;
+using Microsoft.SemanticKernel.SemanticFunctions;
 using Microsoft.SemanticKernel.Skills.Core;
 using Microsoft.SemanticKernel.Skills.Web;
 using Microsoft.SemanticKernel.Skills.Web.Bing;

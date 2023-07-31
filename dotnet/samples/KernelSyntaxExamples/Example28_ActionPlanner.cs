@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.Orchestration;
 using Microsoft.SemanticKernel.Planning;
+using Microsoft.SemanticKernel.SemanticFunctions;
 using RepoUtils;
 
 // ReSharper disable once InconsistentNaming

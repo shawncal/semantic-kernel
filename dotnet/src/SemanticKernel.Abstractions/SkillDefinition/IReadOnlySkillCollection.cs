@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
+using System;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Microsoft.SemanticKernel.SkillDefinition;
@@ -47,8 +48,19 @@ public interface IReadOnlySkillCollection
     /// <summary>
     /// Get all registered functions details, minus the delegates
     /// </summary>
+    /// <returns>An object containing the function details</returns>
+    FunctionsView GetFunctionsView();
+
+    #region Obsolete
+
+    /// <summary>
+    /// Get all registered functions details, minus the delegates
+    /// </summary>
     /// <param name="includeSemantic">Whether to include semantic functions in the list</param>
     /// <param name="includeNative">Whether to include native functions in the list</param>
     /// <returns>An object containing all the functions details</returns>
-    FunctionsView GetFunctionsView(bool includeSemantic = true, bool includeNative = true);
+    [Obsolete("GetFunctionsView() instead")]
+    FunctionsView GetFunctionsView(bool includeSemantic, bool includeNative = true);
+
+    #endregion
 }

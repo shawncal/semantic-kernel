@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.SemanticKernel.Diagnostics;
+using Microsoft.SemanticKernel.NativeFunctions;
 using Microsoft.SemanticKernel.Orchestration;
 using Microsoft.SemanticKernel.SkillDefinition;
 using Microsoft.SemanticKernel.Skills.OpenAPI;
@@ -228,7 +229,7 @@ public static class KernelOpenApiExtensions
     /// <param name="operation">The REST API operation.</param>
     /// <param name="serverUrlOverride">Optional override for REST API server URL if user input required</param>
     /// <param name="cancellationToken">The cancellation token.</param>
-    /// <returns>An instance of <see cref="SKFunction"/> class.</returns>
+    /// <returns>An instance of <see cref="NativeFunction"/> class.</returns>
     private static ISKFunction RegisterRestApiFunction(
         this IKernel kernel,
         string skillName,
@@ -295,7 +296,7 @@ public static class KernelOpenApiExtensions
             })
             .ToList();
 
-        var function = SKFunction.FromNativeFunction(
+        var function = NativeFunction.FromNativeFunction(
             nativeFunction: ExecuteAsync,
             parameters: parameters,
             description: operation.Description,

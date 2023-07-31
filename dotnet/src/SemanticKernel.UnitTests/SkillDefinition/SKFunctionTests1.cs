@@ -30,7 +30,7 @@ public sealed class SKFunctionTests1
         var functionConfig = new SemanticFunctionConfig(templateConfig, this._promptTemplate.Object);
 
         // Act
-        var skFunction = SKFunction.FromSemanticConfig("sk", "name", functionConfig);
+        var skFunction = PromptFunction.FromSemanticConfig("sk", "name", functionConfig);
 
         // Assert
         Assert.Equal(0, skFunction.RequestSettings.Temperature);
@@ -43,7 +43,7 @@ public sealed class SKFunctionTests1
         // Arrange
         var templateConfig = new PromptTemplateConfig();
         var functionConfig = new SemanticFunctionConfig(templateConfig, this._promptTemplate.Object);
-        var skFunction = SKFunction.FromSemanticConfig("sk", "name", functionConfig);
+        var skFunction = PromptFunction.FromSemanticConfig("sk", "name", functionConfig);
         var settings = new CompleteRequestSettings
         {
             Temperature = 0.9,

@@ -54,14 +54,12 @@ public sealed class PromptFunction : IPromptFunction, IDisposable
     /// <param name="functionName">Name of the function to create.</param>
     /// <param name="functionConfig">Semantic function configuration.</param>
     /// <param name="logger">Optional logger for the function.</param>
-    /// <param name="cancellationToken">The <see cref="CancellationToken"/> to monitor for cancellation requests. The default is <see cref="CancellationToken.None"/>.</param>
     /// <returns>SK function instance.</returns>
-    public static ISKFunction FromSemanticConfig(
+    public static IPromptFunction FromSemanticConfig(
         string skillName,
         string functionName,
         SemanticFunctionConfig functionConfig,
-        ILogger? logger = null,
-        CancellationToken cancellationToken = default)
+        ILogger? logger = null)
     {
         Verify.NotNull(functionConfig);
 

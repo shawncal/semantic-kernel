@@ -11,6 +11,7 @@ using Azure.Identity;
 using Microsoft.Extensions.Logging;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.Diagnostics;
+using Microsoft.SemanticKernel.SemanticFunctions;
 using RepoUtils;
 
 // ReSharper disable once InconsistentNaming

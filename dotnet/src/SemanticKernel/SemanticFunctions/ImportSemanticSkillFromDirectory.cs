@@ -4,13 +4,12 @@ using System.Collections.Generic;
 using System.IO;
 using Microsoft.Extensions.Logging;
 using Microsoft.SemanticKernel.Diagnostics;
-using Microsoft.SemanticKernel.SemanticFunctions;
 using Microsoft.SemanticKernel.SkillDefinition;
 using Microsoft.SemanticKernel.Text;
 
 #pragma warning disable IDE0130
 // ReSharper disable once CheckNamespace - Using the namespace of IKernel
-namespace Microsoft.SemanticKernel;
+namespace Microsoft.SemanticKernel.SemanticFunctions;
 #pragma warning restore IDE0130
 
 /// <summary>

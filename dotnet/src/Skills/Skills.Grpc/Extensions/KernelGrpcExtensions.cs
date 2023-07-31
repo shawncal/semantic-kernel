@@ -9,6 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.SemanticKernel.Diagnostics;
+using Microsoft.SemanticKernel.NativeFunctions;
 using Microsoft.SemanticKernel.Orchestration;
 using Microsoft.SemanticKernel.SkillDefinition;
 using Microsoft.SemanticKernel.Skills.Grpc.Model;
@@ -137,7 +138,7 @@ public static class KernelGrpcExtensions
     /// <param name="runner">gRPC operation runner.</param>
     /// <param name="skillName">Skill name.</param>
     /// <param name="operation">The gRPC operation.</param>
-    /// <returns>An instance of <see cref="SKFunction"/> class.</returns>
+    /// <returns>An instance of <see cref="NativeFunction"/> class.</returns>
     private static ISKFunction RegisterGrpcFunction(
         this IKernel kernel,
         GrpcOperationRunner runner,
@@ -183,7 +184,7 @@ public static class KernelGrpcExtensions
             return context;
         }
 
-        var function = SKFunction.FromNativeFunction(
+        var function = NativeFunction.FromNativeFunction(
             nativeFunction: ExecuteAsync,
             parameters: operationParameters.ToList(),
             description: operation.Name,

@@ -7,6 +7,7 @@ using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.Memory;
 using Microsoft.SemanticKernel.Planning;
 using Microsoft.SemanticKernel.Planning.Sequential;
+using Microsoft.SemanticKernel.SemanticFunctions;
 using RepoUtils;
 using Skills;
 

@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Threading.Tasks;
+using Microsoft.SemanticKernel.NativeFunctions;
 using Microsoft.SemanticKernel.Orchestration;
 using Microsoft.SemanticKernel.SkillDefinition;
 using Microsoft.SemanticKernel.TemplateEngine;
@@ -129,7 +130,7 @@ public sealed class PromptTemplateEngineTests
             return $"F({context.Variables.Input})";
         }
 
-        ISKFunction func = SKFunction.FromNativeMethod(Method(MyFunctionAsync), this);
+        ISKFunction func = NativeFunction.FromNativeMethod(Method(MyFunctionAsync), this);
         Assert.NotNull(func);
 
         this._variables.Update("INPUT-BAR");
@@ -158,7 +159,7 @@ public sealed class PromptTemplateEngineTests
             return $"F({context.Variables.Input})";
         }
 
-        ISKFunction func = SKFunction.FromNativeMethod(Method(MyFunctionAsync), this);
+        ISKFunction func = NativeFunction.FromNativeMethod(Method(MyFunctionAsync), this);
         Assert.NotNull(func);
 
         this._variables.Set("myVar", "BAR");
@@ -188,7 +189,7 @@ public sealed class PromptTemplateEngineTests
             return Task.FromResult(context.Variables.Input);
         }
 
-        ISKFunction func = SKFunction.FromNativeMethod(Method(MyFunctionAsync), this);
+        ISKFunction func = NativeFunction.FromNativeMethod(Method(MyFunctionAsync), this);
         Assert.NotNull(func);
 
         this._variables.Set("myVar", "BAR");
@@ -238,9 +239,9 @@ public sealed class PromptTemplateEngineTests
 
         var functions = new List<ISKFunction>()
         {
-            SKFunction.FromNativeMethod(Method(MyFunction1Async), this, "func1"),
-            SKFunction.FromNativeMethod(Method(MyFunction2Async), this, "func2"),
-            SKFunction.FromNativeMethod(Method(MyFunction3Async), this, "func3")
+            NativeFunction.FromNativeMethod(Method(MyFunction1Async), this, "func1"),
+            NativeFunction.FromNativeMethod(Method(MyFunction2Async), this, "func2"),
+            NativeFunction.FromNativeMethod(Method(MyFunction3Async), this, "func3")
         };
 
         foreach (var func in functions)

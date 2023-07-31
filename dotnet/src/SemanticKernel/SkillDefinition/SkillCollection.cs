@@ -8,6 +8,7 @@ using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.SemanticKernel.Diagnostics;
+using Microsoft.SemanticKernel.SemanticFunctions;
 
 namespace Microsoft.SemanticKernel.SkillDefinition;
 
@@ -76,7 +77,8 @@ public class SkillCollection : ISkillCollection
     }
 
     /// <inheritdoc/>
-    public FunctionsView GetFunctionsView(bool includeSemantic = true, bool includeNative = true)
+    [Obsolete("Use GetFunctionsView() instead.")]
+    public FunctionsView GetFunctionsView(bool includeSemantic, bool includeNative = true)
     {
         var result = new FunctionsView();
 
@@ -86,11 +88,27 @@ public class SkillCollection : ISkillCollection
             {
                 foreach (KeyValuePair<string, ISKFunction> f in skill.Value)
                 {
-                    if (f.Value.IsSemantic ? includeSemantic : includeNative)
+                    if (f.Value is IPromptFunction ? includeSemantic : includeNative)
                     {
                         result.AddFunction(f.Value.Describe());
                     }
                 }
+            }
+        }
+
+        return result;
+    }
+
+    /// <inheritdoc/>
+    public FunctionsView GetFunctionsView()
+    {
+        var result = new FunctionsView();
+
+        foreach (var skill in this._skillCollection)
+        {
+            foreach (KeyValuePair<string, ISKFunction> f in skill.Value)
+            {
+                result.AddFunction(f.Value.Describe());
             }
         }
 
