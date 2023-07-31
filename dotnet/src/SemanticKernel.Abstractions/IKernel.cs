@@ -181,7 +181,6 @@ public interface IKernel
     [EditorBrowsable(EditorBrowsableState.Never)]
     SKContext CreateNewContext(CancellationToken cancellationToken);
 
-
     /// <summary>
     /// Registers a custom function in the internal skill collection.
     /// </summary>

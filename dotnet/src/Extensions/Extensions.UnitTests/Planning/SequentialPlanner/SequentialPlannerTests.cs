@@ -43,7 +43,7 @@ public sealed class SequentialPlannerTests
             functionsView.AddFunction(functionView);
 
             mockFunction.Setup(x =>
-                    x.InvokeAsync(It.IsAny<SKContext>(), It.IsAny<CompleteRequestSettings>(), It.IsAny<CancellationToken>()))
+                    x.InvokeAsync(It.IsAny<SKContext>(), It.IsAny<CancellationToken>()))
                 .Returns<SKContext, CompleteRequestSettings, CancellationToken>((context, settings, cancellationToken) =>
                 {
                     context.Variables.Update("MOCK FUNCTION CALLED");
@@ -56,7 +56,7 @@ public sealed class SequentialPlannerTests
             skills.Setup(x => x.TryGetFunction(It.Is<string>(s => s == skillName), It.Is<string>(s => s == name), out outFunc)).Returns(true);
         }
 
-        skills.Setup(x => x.GetFunctionsView(It.IsAny<bool>(), It.IsAny<bool>())).Returns(functionsView);
+        skills.Setup(x => x.GetFunctionsView()).Returns(functionsView);
 
         var expectedFunctions = input.Select(x => x.name).ToList();
         var expectedSkills = input.Select(x => x.skillName).ToList();
@@ -83,10 +83,10 @@ public sealed class SequentialPlannerTests
 
         returnContext.Variables.Update(planString);
 
-        var mockFunctionFlowFunction = new Mock<ISKFunction>();
+        var mockFunctionFlowFunction = new Mock<IPromptFunction>();
         mockFunctionFlowFunction.Setup(x => x.InvokeAsync(
             It.IsAny<SKContext>(),
-            null,
+            It.IsAny<CompleteRequestSettings>(),
             default
         )).Callback<SKContext, CompleteRequestSettings, CancellationToken>(
             (c, s, ct) => c.Variables.Update("Hello world!")
@@ -152,7 +152,7 @@ public sealed class SequentialPlannerTests
         var skills = new Mock<ISkillCollection>();
 
         var functionsView = new FunctionsView();
-        skills.Setup(x => x.GetFunctionsView(It.IsAny<bool>(), It.IsAny<bool>())).Returns(functionsView);
+        skills.Setup(x => x.GetFunctionsView()).Returns(functionsView);
 
         var planString = "<plan>notvalid<</plan>";
         var returnContext = new SKContext(
@@ -167,12 +167,12 @@ public sealed class SequentialPlannerTests
             new Mock<ILogger>().Object
         );
 
-        var mockFunctionFlowFunction = new Mock<ISKFunction>();
+        var mockFunctionFlowFunction = new Mock<IPromptFunction>();
         mockFunctionFlowFunction.Setup(x => x.InvokeAsync(
             It.IsAny<SKContext>(),
-            null,
+            It.IsAny<CompleteRequestSettings?>(),
             default
-        )).Callback<SKContext, CompleteRequestSettings, CancellationToken>(
+        )).Callback<SKContext, CompleteRequestSettings?, CancellationToken>(
             (c, s, ct) => c.Variables.Update("Hello world!")
         ).Returns(() => Task.FromResult(returnContext));
 

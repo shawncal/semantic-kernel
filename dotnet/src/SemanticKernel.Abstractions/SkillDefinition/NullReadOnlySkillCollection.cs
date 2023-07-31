@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
+using System;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 
@@ -32,7 +33,7 @@ internal sealed class NullReadOnlySkillCollection : IReadOnlySkillCollection
         return false;
     }
 
-    public FunctionsView GetFunctionsView(bool includeSemantic = true, bool includeNative = true)
+    public FunctionsView GetFunctionsView()
     {
         return new();
     }
@@ -56,4 +57,14 @@ internal sealed class NullReadOnlySkillCollection : IReadOnlySkillCollection
             KernelException.ErrorCodes.FunctionNotAvailable,
             $"Function not available: {functionName}");
     }
+
+    #region Obsolete
+
+    [Obsolete("Use GetFunctionsView() instead.")]
+    public FunctionsView GetFunctionsView(bool includeSemantic = true, bool includeNative = true)
+    {
+        return new();
+    }
+
+    #endregion
 }

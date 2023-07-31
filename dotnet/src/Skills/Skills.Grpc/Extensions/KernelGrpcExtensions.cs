@@ -192,7 +192,7 @@ public static class KernelGrpcExtensions
             functionName: operation.Name,
             logger: kernel.Logger);
 
-        return kernel.RegisterCustomFunction(function);
+        return kernel.RegisterFunction(function);
     }
 
     #endregion

@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.SemanticKernel;
-using Microsoft.SemanticKernel.AI.TextCompletion;
 using Microsoft.SemanticKernel.Orchestration;
 using Microsoft.SemanticKernel.Planning;
 using Microsoft.SemanticKernel.SemanticFunctions;
@@ -35,8 +34,8 @@ public sealed class ActionPlannerTests
             functionsView.AddFunction(functionView);
 
             mockFunction.Setup(x =>
-                    x.InvokeAsync(It.IsAny<SKContext>(), It.IsAny<CompleteRequestSettings>(), It.IsAny<CancellationToken>()))
-                .Returns<SKContext, CompleteRequestSettings, CancellationToken>((context, settings, CancellationToken) =>
+                    x.InvokeAsync(It.IsAny<SKContext>(), It.IsAny<CancellationToken>()))
+                .Returns<SKContext, CancellationToken>((context, CancellationToken) =>
                 {
                     context.Variables.Update("MOCK FUNCTION CALLED");
                     return Task.FromResult(context);
@@ -48,7 +47,7 @@ public sealed class ActionPlannerTests
             skills.Setup(x => x.TryGetFunction(It.Is<string>(s => s == skillName), It.Is<string>(s => s == name), out outFunc)).Returns(true);
         }
 
-        skills.Setup(x => x.GetFunctionsView(It.IsAny<bool>(), It.IsAny<bool>())).Returns(functionsView);
+        skills.Setup(x => x.GetFunctionsView()).Returns(functionsView);
 
         string planString = "Here is a possible plan to accomplish the user intent:\n\n{\"plan\":{\n\"rationale\": \"the list contains a function that allows to list pull requests\",\n\"function\": \"GitHubSkill.PullsList\",\n\"parameters\": {\n\"owner\": \"microsoft\",\n\"repo\": \"semantic-kernel\",\n\"state\": \"open\"\n}}}\n\nThis plan uses the `GitHubSkill.PullsList` function to list the open pull requests for the `semantic-kernel` repository owned by `microsoft`. The `state` parameter is set to `\"open\"` to filter the results to only show open pull requests.";
 
@@ -106,7 +105,7 @@ public sealed class ActionPlannerTests
             skills = new Mock<ISkillCollection>();
 
             var functionsView = new FunctionsView();
-            skills.Setup(x => x.GetFunctionsView(It.IsAny<bool>(), It.IsAny<bool>())).Returns(functionsView);
+            skills.Setup(x => x.GetFunctionsView()).Returns(functionsView);
         }
 
         var returnContext = new SKContext(
@@ -118,13 +117,13 @@ public sealed class ActionPlannerTests
             skills: skills.Object
         );
 
-        var mockFunctionFlowFunction = new Mock<ISKFunction>();
+        var mockFunctionFlowFunction = new Mock<IPromptFunction>();
         mockFunctionFlowFunction.Setup(x => x.InvokeAsync(
             It.IsAny<SKContext>(),
             null,
             default
-        )).Callback<SKContext, CompleteRequestSettings, CancellationToken>(
-            (c, s, ct) => c.Variables.Update("Hello world!")
+        )).Callback<SKContext, CancellationToken>(
+            (c, ct) => c.Variables.Update("Hello world!")
         ).Returns(() => Task.FromResult(returnContext));
 
         // Mock Skills

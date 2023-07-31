@@ -58,6 +58,15 @@ public class SequentialPlanParserTests
         return mockFunction;
     }
 
+    private static Mock<IPromptFunction> CreateMockPromptFunction(FunctionView functionView, string result = "")
+    {
+        var mockFunction = new Mock<IPromptFunction>();
+        mockFunction.Setup(x => x.Describe()).Returns(functionView);
+        mockFunction.Setup(x => x.Name).Returns(functionView.Name);
+        mockFunction.Setup(x => x.SkillName).Returns(functionView.SkillName);
+        return mockFunction;
+    }
+
     private void CreateKernelAndFunctionCreateMocks(List<(string name, string skillName, string description, bool isSemantic, string result)> functions,
         out IKernel kernel)
     {
@@ -71,12 +80,12 @@ public class SequentialPlanParserTests
         foreach (var (name, skillName, description, isSemantic, resultString) in functions)
         {
             var functionView = new FunctionView(name, skillName, description, new List<ParameterView>(), isSemantic, true);
-            var mockFunction = CreateMockFunction(functionView);
+            var mockFunction = CreateMockPromptFunction(functionView);
             functionsView.AddFunction(functionView);
 
             var result = this.CreateSKContext(kernel);
             result.Variables.Update(resultString);
-            mockFunction.Setup(x => x.InvokeAsync(It.IsAny<SKContext>(), null, It.IsAny<CancellationToken>()))
+            mockFunction.Setup(x => x.InvokeAsync(It.IsAny<SKContext>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(result);
 
             if (string.IsNullOrEmpty(name))
@@ -96,7 +105,7 @@ public class SequentialPlanParserTests
             }
         }
 
-        skills.Setup(x => x.GetFunctionsView(It.IsAny<bool>(), It.IsAny<bool>())).Returns(functionsView);
+        skills.Setup(x => x.GetFunctionsView()).Returns(functionsView);
     }
 
     [Fact]

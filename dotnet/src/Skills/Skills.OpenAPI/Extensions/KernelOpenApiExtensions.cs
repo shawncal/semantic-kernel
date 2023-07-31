@@ -304,7 +304,7 @@ public static class KernelOpenApiExtensions
             functionName: ConvertOperationIdToValidFunctionName(operation.Id, logger),
             logger: logger);
 
-        return kernel.RegisterCustomFunction(function);
+        return kernel.RegisterFunction(function);
     }
 
     /// <summary>
