@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.SkillDefinition;
+using Microsoft.SemanticKernel.TemplateEngine;
 using Moq;
 using Xunit;
 
@@ -51,6 +52,7 @@ public sealed class ParseResultTests
         // Arrange
         var kernel = new Mock<IKernel>();
         kernel.Setup(x => x.Logger).Returns(new Mock<ILogger>().Object);
+        kernel.Setup(x => x.PromptTemplateEngine).Returns(new Mock<IPromptTemplateEngine>().Object);
 
         var planner = new Microsoft.SemanticKernel.Planning.StepwisePlanner(kernel.Object);
 
