@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.SemanticKernel;
+using Microsoft.SemanticKernel.AI.TextCompletion;
 using Microsoft.SemanticKernel.Orchestration;
 using Microsoft.SemanticKernel.Planning;
 using Microsoft.SemanticKernel.SemanticFunctions;
@@ -117,13 +118,13 @@ public sealed class ActionPlannerTests
             skills: skills.Object
         );
 
-        var mockFunctionFlowFunction = new Mock<PromptFunction>();
+        var mockFunctionFlowFunction = new Mock<IPromptFunction>();
         mockFunctionFlowFunction.Setup(x => x.InvokeAsync(
             It.IsAny<SKContext>(),
             null,
             default
-        )).Callback<SKContext, CancellationToken>(
-            (c, ct) => c.Variables.Update("Hello world!")
+        )).Callback<SKContext, CompleteRequestSettings?, CancellationToken>(
+            (c, s, ct) => c.Variables.Update("Hello world!")
         ).Returns(() => Task.FromResult(returnContext));
 
         // Mock Skills
@@ -143,7 +144,6 @@ public sealed class ActionPlannerTests
     private static Mock<ISKFunction> CreateMockFunction(FunctionView functionView)
     {
         var mockFunction = new Mock<ISKFunction>();
-        mockFunction.Setup(x => x.Describe()).Returns(functionView);
         mockFunction.Setup(x => x.Name).Returns(functionView.Name);
         mockFunction.Setup(x => x.SkillName).Returns(functionView.SkillName);
         return mockFunction;

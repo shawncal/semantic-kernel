@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.SemanticKernel.Orchestration;
+using Microsoft.SemanticKernel.SemanticFunctions;
 using Microsoft.SemanticKernel.SkillDefinition;
 
 #pragma warning disable IDE0130 // Namespace does not match folder structure
@@ -81,6 +82,7 @@ public static class SKFunctionExtensions
             SkillName = function.SkillName,
             Description = function.Description,
             Parameters = function.Parameters,
+            IsSemantic = function is IPromptFunction
         };
     }
 }

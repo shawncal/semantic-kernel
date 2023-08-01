@@ -83,7 +83,7 @@ public sealed class SequentialPlannerTests
 
         returnContext.Variables.Update(planString);
 
-        var mockFunctionFlowFunction = new Mock<PromptFunction>();
+        var mockFunctionFlowFunction = new Mock<IPromptFunction>();
         mockFunctionFlowFunction.Setup(x => x.InvokeAsync(
             It.IsAny<SKContext>(),
             It.IsAny<CompleteRequestSettings>(),
@@ -167,7 +167,7 @@ public sealed class SequentialPlannerTests
             new Mock<ILogger>().Object
         );
 
-        var mockFunctionFlowFunction = new Mock<PromptFunction>();
+        var mockFunctionFlowFunction = new Mock<IPromptFunction>();
         mockFunctionFlowFunction.Setup(x => x.InvokeAsync(
             It.IsAny<SKContext>(),
             It.IsAny<CompleteRequestSettings?>(),

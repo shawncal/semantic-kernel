@@ -58,9 +58,9 @@ public class SequentialPlanParserTests
         return mockFunction;
     }
 
-    private static Mock<PromptFunction> CreateMockPromptFunction(FunctionView functionView, string result = "")
+    private static Mock<IPromptFunction> CreateMockPromptFunction(FunctionView functionView, string result = "")
     {
-        var mockFunction = new Mock<PromptFunction>();
+        var mockFunction = new Mock<IPromptFunction>();
         mockFunction.Setup(x => x.Describe()).Returns(functionView);
         mockFunction.Setup(x => x.Name).Returns(functionView.Name);
         mockFunction.Setup(x => x.SkillName).Returns(functionView.SkillName);
