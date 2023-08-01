@@ -137,7 +137,7 @@ public static class KernelGrpcExtensions
     /// <param name="runner">gRPC operation runner.</param>
     /// <param name="skillName">Skill name.</param>
     /// <param name="operation">The gRPC operation.</param>
-    /// <returns>An instance of <see cref="NativeFunction"/> class.</returns>
+    /// <returns>An instance of <see cref="SKFunction"/> class.</returns>
     private static ISKFunction RegisterGrpcFunction(
         this IKernel kernel,
         GrpcOperationRunner runner,
@@ -183,7 +183,7 @@ public static class KernelGrpcExtensions
             return context;
         }
 
-        var function = NativeFunction.FromNativeFunction(
+        var function = SKFunction.FromNativeFunction(
             nativeFunction: ExecuteAsync,
             parameters: operationParameters.ToList(),
             description: operation.Name,

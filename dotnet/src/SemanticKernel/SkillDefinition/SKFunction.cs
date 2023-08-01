@@ -27,7 +27,7 @@ namespace Microsoft.SemanticKernel.SkillDefinition;
 /// with additional methods required by the kernel.
 /// </summary>
 [DebuggerDisplay("{DebuggerDisplay,nq}")]
-public sealed class NativeFunction : ISKFunction, IDisposable
+public sealed class SKFunction : ISKFunction, IDisposable
 {
     /// <inheritdoc/>
     public string Name { get; }
@@ -69,7 +69,7 @@ public sealed class NativeFunction : ISKFunction, IDisposable
 
         MethodDetails methodDetails = GetMethodDetails(method, target, logger);
 
-        return new NativeFunction(
+        return new SKFunction(
             delegateFunction: methodDetails.Function,
             parameters: methodDetails.Parameters,
             skillName: skillName!,
@@ -105,7 +105,7 @@ public sealed class NativeFunction : ISKFunction, IDisposable
             skillName = SkillCollection.GlobalSkill;
         }
 
-        return new NativeFunction(
+        return new SKFunction(
             delegateFunction: methodDetails.Function,
             parameters: parameters is not null ? parameters.ToList() : Array.Empty<ParameterView>(),
             description: description,
@@ -184,7 +184,7 @@ public sealed class NativeFunction : ISKFunction, IDisposable
         public string Description { get; set; }
     }
 
-    internal NativeFunction(
+    internal SKFunction(
         Func<SKContext, CancellationToken, Task<SKContext>> delegateFunction,
         IList<ParameterView> parameters,
         string skillName,

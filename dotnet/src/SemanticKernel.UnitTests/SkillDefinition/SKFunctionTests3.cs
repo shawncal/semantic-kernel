@@ -25,7 +25,7 @@ public sealed class SKFunctionTests3
             .Where(m => m.Name is not "GetType" and not "Equals" and not "GetHashCode" and not "ToString")
             .ToArray();
 
-        ISKFunction[] functions = (from method in methods select NativeFunction.FromNativeMethod(method, skillInstance, "skill")).ToArray();
+        ISKFunction[] functions = (from method in methods select SKFunction.FromNativeMethod(method, skillInstance, "skill")).ToArray();
 
         // Act
         Assert.Equal(methods.Length, functions.Length);
@@ -65,7 +65,7 @@ public sealed class SKFunctionTests3
         {
             try
             {
-                NativeFunction.FromNativeMethod(method, instance, "skill");
+                SKFunction.FromNativeMethod(method, instance, "skill");
             }
             catch (KernelException e) when (e.ErrorCode is KernelException.ErrorCodes.FunctionTypeNotSupported or KernelException.ErrorCodes.InvalidFunctionDescription)
             {
@@ -95,7 +95,7 @@ public sealed class SKFunctionTests3
         }
 
         // Act
-        ISKFunction function = NativeFunction.FromNativeFunction(
+        ISKFunction function = SKFunction.FromNativeFunction(
             nativeFunction: ExecuteAsync,
             parameters: null,
             description: "description",
@@ -131,7 +131,7 @@ public sealed class SKFunctionTests3
         }
 
         // Act. Note: this will throw an exception if SKFunction doesn't handle the function type.
-        ISKFunction function = NativeFunction.FromNativeFunction(
+        ISKFunction function = SKFunction.FromNativeFunction(
             nativeFunction: ExecuteAsync,
             description: "description",
             skillName: "skillName",

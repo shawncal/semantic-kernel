@@ -59,7 +59,7 @@ public static class KernelExtensions
         {
             if (method.GetCustomAttribute<SKFunctionAttribute>() is not null)
             {
-                ISKFunction function = NativeFunction.FromNativeMethod(method, skillInstance, skillName, logger);
+                ISKFunction function = SKFunction.FromNativeMethod(method, skillInstance, skillName, logger);
                 if (result.ContainsKey(function.Name))
                 {
                     throw new KernelException(

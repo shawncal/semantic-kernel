@@ -228,7 +228,7 @@ public static class KernelOpenApiExtensions
     /// <param name="operation">The REST API operation.</param>
     /// <param name="serverUrlOverride">Optional override for REST API server URL if user input required</param>
     /// <param name="cancellationToken">The cancellation token.</param>
-    /// <returns>An instance of <see cref="NativeFunction"/> class.</returns>
+    /// <returns>An instance of <see cref="SKFunction"/> class.</returns>
     private static ISKFunction RegisterRestApiFunction(
         this IKernel kernel,
         string skillName,
@@ -295,7 +295,7 @@ public static class KernelOpenApiExtensions
             })
             .ToList();
 
-        var function = NativeFunction.FromNativeFunction(
+        var function = SKFunction.FromNativeFunction(
             nativeFunction: ExecuteAsync,
             parameters: parameters,
             description: operation.Description,
