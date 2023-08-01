@@ -16,7 +16,6 @@ Empowers app owners to integrate cutting-edge LLM technology quickly and easily 
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Extensions\Functions.DotNet\Functions.DotNet.csproj" />
     <ProjectReference Include="..\Extensions\Functions.Prompt\Functions.Prompt.csproj" />
     <ProjectReference Include="..\SemanticKernel\SemanticKernel.csproj" PrivateAssets="none" />
     <ProjectReference Include="..\Connectors\Connectors.AI.OpenAI\Connectors.AI.OpenAI.csproj" PrivateAssets="none" />

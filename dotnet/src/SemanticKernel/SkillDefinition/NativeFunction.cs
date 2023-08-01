@@ -14,12 +14,10 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.SemanticKernel.Diagnostics;
 using Microsoft.SemanticKernel.Orchestration;
-using Microsoft.SemanticKernel.SkillDefinition;
 
-namespace Microsoft.SemanticKernel.Functions.DotNet;
+namespace Microsoft.SemanticKernel.SkillDefinition;
 
 #pragma warning disable format
 
@@ -76,8 +74,7 @@ public sealed class NativeFunction : ISKFunction, IDisposable
             parameters: methodDetails.Parameters,
             skillName: skillName!,
             functionName: methodDetails.Name,
-            description: methodDetails.Description,
-            logger: logger);
+            description: methodDetails.Description);
     }
 
     /// <summary>
@@ -113,8 +110,7 @@ public sealed class NativeFunction : ISKFunction, IDisposable
             parameters: parameters is not null ? parameters.ToList() : Array.Empty<ParameterView>(),
             description: description,
             skillName: skillName!,
-            functionName: functionName,
-            logger: logger);
+            functionName: functionName);
     }
 
     /// <inheritdoc/>
@@ -141,8 +137,8 @@ public sealed class NativeFunction : ISKFunction, IDisposable
         catch (Exception e) when (!e.IsCriticalException())
         {
             const string Message = "Something went wrong while executing the native function. Function: {0}. Error: {1}";
-            this._logger.LogError(e, Message, this._function.Method.Name, e.Message);
-            //context.LastException = e; TODO: Resolve this before checkin
+            context.Logger.LogError(e, Message, this._function.Method.Name, e.Message);
+            context.LastException = e;
             return context;
         }
     }
@@ -178,7 +174,6 @@ public sealed class NativeFunction : ISKFunction, IDisposable
     private static readonly JsonSerializerOptions s_toStringStandardSerialization = new();
     private static readonly JsonSerializerOptions s_toStringIndentedSerialization = new() { WriteIndented = true };
     private Func<SKContext, CancellationToken, Task<SKContext>> _function;
-    private readonly ILogger _logger;
     private IReadOnlySkillCollection? _skillCollection;
 
     private struct MethodDetails
@@ -194,15 +189,12 @@ public sealed class NativeFunction : ISKFunction, IDisposable
         IList<ParameterView> parameters,
         string skillName,
         string functionName,
-        string description,
-        ILogger? logger = null)
+        string description)
     {
         Verify.NotNull(delegateFunction);
         Verify.ValidSkillName(skillName);
         Verify.ValidFunctionName(functionName);
         Verify.ParametersUniqueness(parameters);
-
-        this._logger = logger ?? NullLogger.Instance;
 
         this._function = delegateFunction;
         this.Parameters = parameters;

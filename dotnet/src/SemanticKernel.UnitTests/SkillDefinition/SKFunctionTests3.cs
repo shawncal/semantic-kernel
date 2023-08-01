@@ -7,9 +7,8 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.SemanticKernel;
-using Microsoft.SemanticKernel.Functions.DotNet;
-using Microsoft.SemanticKernel.Orchestration;
 using Microsoft.SemanticKernel.SkillDefinition;
+using Microsoft.SemanticKernel.Orchestration;
 using Xunit;
 
 namespace SemanticKernel.UnitTests.SkillDefinition;

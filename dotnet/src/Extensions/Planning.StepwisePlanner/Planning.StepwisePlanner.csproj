@@ -19,7 +19,6 @@
   <ItemGroup>
     <ProjectReference Include="..\..\SemanticKernel.Abstractions\SemanticKernel.Abstractions.csproj" />
     <ProjectReference Include="..\..\SemanticKernel\SemanticKernel.csproj" />
-    <ProjectReference Include="..\Functions.DotNet\Functions.DotNet.csproj" />
     <ProjectReference Include="..\Functions.Prompt\Functions.Prompt.csproj" />
   </ItemGroup>
 

@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.Reflection;
 using Microsoft.Extensions.Logging;
 using Microsoft.SemanticKernel.Diagnostics;
-using Microsoft.SemanticKernel.Functions.DotNet;
 using Microsoft.SemanticKernel.SkillDefinition;
 
 #pragma warning disable IDE0130 // Namespace does not match folder structure

@@ -117,7 +117,7 @@ public sealed class ActionPlannerTests
             skills: skills.Object
         );
 
-        var mockFunctionFlowFunction = new Mock<IPromptFunction>();
+        var mockFunctionFlowFunction = new Mock<PromptFunction>();
         mockFunctionFlowFunction.Setup(x => x.InvokeAsync(
             It.IsAny<SKContext>(),
             null,
