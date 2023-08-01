@@ -68,4 +68,19 @@ public static class SKFunctionExtensions
     {
         return new InstrumentedSKFunction(function, logger);
     }
+
+    /// <summary>
+    /// Returns a description of the function, including parameters.
+    /// </summary>
+    /// <returns>An instance of <see cref="FunctionView"/> describing the function</returns>
+    public static FunctionView Describe(this ISKFunction function)
+    {
+        return new FunctionView
+        {
+            Name = function.Name,
+            SkillName = function.SkillName,
+            Description = function.Description,
+            Parameters = function.Parameters,
+        };
+    }
 }

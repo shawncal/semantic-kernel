@@ -114,18 +114,6 @@ public sealed class SKFunction : ISKFunction, IDisposable
     }
 
     /// <inheritdoc/>
-    public FunctionView Describe()
-    {
-        return new FunctionView
-        {
-            Name = this.Name,
-            SkillName = this.SkillName,
-            Description = this.Description,
-            Parameters = this.Parameters,
-        };
-    }
-
-    /// <inheritdoc/>
     public async Task<SKContext> InvokeAsync(
         SKContext context,
         CancellationToken cancellationToken = default)

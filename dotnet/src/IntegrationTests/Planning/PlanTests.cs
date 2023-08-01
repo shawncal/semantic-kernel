@@ -159,7 +159,7 @@ public sealed class PlanTests : IDisposable
         cv.Set("email_address", "$TheEmailFromState");
         var sendEmailPlan = new Plan(emailSkill["SendEmail"])
         {
-            Parameters = cv,
+            PlanParameters = cv,
         };
 
         var plan = new Plan(goal);
@@ -192,7 +192,7 @@ public sealed class PlanTests : IDisposable
         cv.Set("email_address", string.Empty);
         var sendEmailPlan = new Plan(emailSkill["SendEmail"])
         {
-            Parameters = cv,
+            PlanParameters = cv,
         };
 
         var plan = new Plan(goal);
@@ -225,7 +225,7 @@ public sealed class PlanTests : IDisposable
         cv.Set("email_address", "$TheEmailFromState");
         var sendEmailPlan = new Plan(emailSkill["SendEmail"])
         {
-            Parameters = cv
+            PlanParameters = cv
         };
 
         var plan = new Plan(goal);
@@ -265,7 +265,7 @@ public sealed class PlanTests : IDisposable
         };
         var translatePlan = new Plan(writerSkill["Translate"])
         {
-            Parameters = cv,
+            PlanParameters = cv,
             Outputs = outputs,
         };
 
@@ -277,7 +277,7 @@ public sealed class PlanTests : IDisposable
         };
         var getEmailPlan = new Plan(emailSkill["GetEmailAddress"])
         {
-            Parameters = cv,
+            PlanParameters = cv,
             Outputs = outputs,
         };
 
@@ -286,7 +286,7 @@ public sealed class PlanTests : IDisposable
         cv.Set("input", "$TRANSLATED_SUMMARY");
         var sendEmailPlan = new Plan(emailSkill["SendEmail"])
         {
-            Parameters = cv
+            PlanParameters = cv
         };
 
         var plan = new Plan(goal);
@@ -339,7 +339,7 @@ public sealed class PlanTests : IDisposable
 
         var translatePlan = new Plan(writerSkill["Translate"])
         {
-            Parameters = cv,
+            PlanParameters = cv,
             Outputs = outputs,
         };
 
@@ -351,7 +351,7 @@ public sealed class PlanTests : IDisposable
         };
         var getEmailPlan = new Plan(emailSkill["GetEmailAddress"])
         {
-            Parameters = cv,
+            PlanParameters = cv,
             Outputs = outputs,
         };
 
@@ -360,7 +360,7 @@ public sealed class PlanTests : IDisposable
         cv.Set("input", "$TRANSLATED_SUMMARY");
         var sendEmailPlan = new Plan(emailSkill["SendEmail"])
         {
-            Parameters = cv
+            PlanParameters = cv
         };
 
         var plan = new Plan(goal);
@@ -398,7 +398,7 @@ public sealed class PlanTests : IDisposable
 
         var translatePlan = new Plan(writerSkill["Translate"])
         {
-            Parameters = cv,
+            PlanParameters = cv,
             Outputs = outputs,
         };
 
@@ -410,7 +410,7 @@ public sealed class PlanTests : IDisposable
         };
         var getEmailPlan = new Plan(emailSkill["GetEmailAddress"])
         {
-            Parameters = cv,
+            PlanParameters = cv,
             Outputs = outputs,
         };
 
@@ -419,7 +419,7 @@ public sealed class PlanTests : IDisposable
         cv.Set("input", "$TRANSLATED_SUMMARY");
         var sendEmailPlan = new Plan(emailSkill["SendEmail"])
         {
-            Parameters = cv
+            PlanParameters = cv
         };
 
         var plan = new Plan(goal);

@@ -519,8 +519,8 @@ public sealed class PlanSerializationTests
 
         Assert.Equal(string.Join(",", plan.Outputs),
             string.Join(",", deserializedPlan.Outputs));
-        Assert.Equal(string.Join(",", plan.Parameters.Select(kv => $"{kv.Key}:{kv.Value}")),
-            string.Join(",", deserializedPlan.Parameters.Select(kv => $"{kv.Key}:{kv.Value}")));
+        Assert.Equal(string.Join(",", plan.PlanParameters.Select(kv => $"{kv.Key}:{kv.Value}")),
+            string.Join(",", deserializedPlan.PlanParameters.Select(kv => $"{kv.Key}:{kv.Value}")));
         Assert.Equal(string.Join(",", plan.State.Select(kv => $"{kv.Key}:{kv.Value}")),
             string.Join(",", deserializedPlan.State.Select(kv => $"{kv.Key}:{kv.Value}")));
 
@@ -575,8 +575,8 @@ public sealed class PlanSerializationTests
 
             Assert.Equal(string.Join(",", plan.Outputs),
                 string.Join(",", deserializedPlan.Outputs));
-            Assert.Equal(string.Join(",", plan.Parameters.Select(kv => $"{kv.Key}:{kv.Value}")),
-                string.Join(",", deserializedPlan.Parameters.Select(kv => $"{kv.Key}:{kv.Value}")));
+            Assert.Equal(string.Join(",", plan.PlanParameters.Select(kv => $"{kv.Key}:{kv.Value}")),
+                string.Join(",", deserializedPlan.PlanParameters.Select(kv => $"{kv.Key}:{kv.Value}")));
             Assert.Equal(string.Join(",", plan.State.Select(kv => $"{kv.Key}:{kv.Value}")),
                 string.Join(",", deserializedPlan.State.Select(kv => $"{kv.Key}:{kv.Value}")));
 

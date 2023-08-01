@@ -7,20 +7,15 @@ using Microsoft.SemanticKernel.AI.TextCompletion;
 using Microsoft.SemanticKernel.Orchestration;
 using Microsoft.SemanticKernel.SkillDefinition;
 
+#pragma warning disable IDE0130 // Namespace does not match folder structure
 namespace Microsoft.SemanticKernel.SemanticFunctions;
+#pragma warning restore IDE0130 // Namespace does not match folder structure
 
 /// <summary>
 /// Semantic Kernel callable function interface
 /// </summary>
 public interface IPromptFunction : ISKFunction
 {
-    /// <summary>
-    /// Whether the function is defined using a prompt template.
-    /// IMPORTANT: native functions might use semantic functions internally,
-    /// so when this property is False, executing the function might still involve AI calls.
-    /// </summary>
-    bool IsSemantic { get; }
-
     /// <summary>
     /// AI service settings
     /// </summary>

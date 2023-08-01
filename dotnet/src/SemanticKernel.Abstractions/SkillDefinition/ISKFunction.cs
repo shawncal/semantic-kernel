@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.SemanticKernel.Orchestration;
@@ -27,10 +28,9 @@ public interface ISKFunction
     string Description { get; }
 
     /// <summary>
-    /// Returns a description of the function, including parameters.
+    /// List of function parameters
     /// </summary>
-    /// <returns>An instance of <see cref="FunctionView"/> describing the function</returns>
-    FunctionView Describe();
+    public IList<ParameterView> Parameters { get; }
 
     /// <summary>
     /// Invoke the <see cref="ISKFunction"/>.

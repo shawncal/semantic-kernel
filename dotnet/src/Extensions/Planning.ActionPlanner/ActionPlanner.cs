@@ -119,7 +119,7 @@ public sealed class ActionPlanner : IActionPlanner
         {
             if (p.Value != null)
             {
-                plan.Parameters[p.Key] = p.Value.ToString();
+                plan.PlanParameters[p.Key] = p.Value.ToString();
             }
         }
 

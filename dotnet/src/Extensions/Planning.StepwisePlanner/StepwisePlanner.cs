@@ -79,8 +79,8 @@ public class StepwisePlanner : IStepwisePlanner
         string functionDescriptions = this.GetFunctionDescriptions();
 
         Plan planStep = new(this._nativeFunctions["ExecutePlan"]);
-        planStep.Parameters.Set("functionDescriptions", functionDescriptions);
-        planStep.Parameters.Set("question", goal);
+        planStep.PlanParameters.Set("functionDescriptions", functionDescriptions);
+        planStep.PlanParameters.Set("question", goal);
 
         planStep.Outputs.Add("agentScratchPad");
         planStep.Outputs.Add("stepCount");

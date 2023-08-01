@@ -171,7 +171,7 @@ internal static class SequentialPlanParser
 
                             // Plan properties
                             planStep.Outputs = functionOutputs;
-                            planStep.Parameters = functionVariables;
+                            planStep.PlanParameters = functionVariables;
                             foreach (var result in functionResults)
                             {
                                 plan.Outputs.Add(result);

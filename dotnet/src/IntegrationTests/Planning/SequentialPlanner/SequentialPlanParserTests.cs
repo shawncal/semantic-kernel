@@ -69,22 +69,22 @@ public class SequentialPlanParserTests
             {
                 Assert.Equal("WriterSkill", step.SkillName);
                 Assert.Equal("Translate", step.Name);
-                Assert.Equal("French", step.Parameters["language"]);
+                Assert.Equal("French", step.PlanParameters["language"]);
                 Assert.True(step.Outputs.Contains("TRANSLATED_SUMMARY"));
             },
             step =>
             {
                 Assert.Equal("email", step.SkillName);
                 Assert.Equal("GetEmailAddress", step.Name);
-                Assert.Equal("John Doe", step.Parameters["input"]);
+                Assert.Equal("John Doe", step.PlanParameters["input"]);
                 Assert.True(step.Outputs.Contains("EMAIL_ADDRESS"));
             },
             step =>
             {
                 Assert.Equal("email", step.SkillName);
                 Assert.Equal("SendEmail", step.Name);
-                Assert.Equal("$TRANSLATED_SUMMARY", step.Parameters["input"]);
-                Assert.Equal("$EMAIL_ADDRESS", step.Parameters["email_address"]);
+                Assert.Equal("$TRANSLATED_SUMMARY", step.PlanParameters["input"]);
+                Assert.Equal("$EMAIL_ADDRESS", step.PlanParameters["email_address"]);
             }
         );
     }

@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.Metrics;
 using System.Threading;
@@ -24,6 +25,8 @@ public sealed class InstrumentedSKFunction : ISKFunction
 
     /// <inheritdoc/>
     public string Description => this._function.Description;
+
+    public IList<ParameterView> Parameters => this._function.Parameters;
 
     /// <summary>
     /// Initialize a new instance of the <see cref="InstrumentedSKFunction"/> class.

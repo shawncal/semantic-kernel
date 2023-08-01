@@ -47,7 +47,7 @@ public static class PlanExtensions
                 string skillName = step.SkillName;
                 string stepName = step.Name;
 
-                string parameters = string.Join(" ", step.Parameters.Select(param => $"{param.Key}='{param.Value}'"));
+                string parameters = string.Join(" ", step.PlanParameters.Select(param => $"{param.Key}='{param.Value}'"));
                 if (!string.IsNullOrEmpty(parameters))
                 {
                     parameters = $" {parameters}";

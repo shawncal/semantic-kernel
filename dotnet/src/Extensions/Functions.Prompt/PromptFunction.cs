@@ -42,9 +42,6 @@ public sealed class PromptFunction : IPromptFunction, IDisposable
     public string Description { get; }
 
     /// <inheritdoc/>
-    public bool IsSemantic => true;
-
-    /// <inheritdoc/>
     public CompleteRequestSettings RequestSettings => this._aiRequestSettings;
 
     /// <summary>
@@ -138,7 +135,6 @@ public sealed class PromptFunction : IPromptFunction, IDisposable
     {
         return new FunctionView
         {
-            IsSemantic = this.IsSemantic,
             Name = this.Name,
             SkillName = this.SkillName,
             Description = this.Description,
@@ -168,7 +164,6 @@ public sealed class PromptFunction : IPromptFunction, IDisposable
     public IPromptFunction SetAIService(Func<ITextCompletion> serviceFactory)
     {
         Verify.NotNull(serviceFactory);
-        this.VerifyIsSemantic();
         this._aiService = new Lazy<ITextCompletion>(serviceFactory);
         return this;
     }
@@ -177,7 +172,6 @@ public sealed class PromptFunction : IPromptFunction, IDisposable
     public IPromptFunction SetAIConfiguration(CompleteRequestSettings settings)
     {
         Verify.NotNull(settings);
-        this.VerifyIsSemantic();
         this._aiRequestSettings = settings;
         return this;
     }
@@ -250,20 +244,6 @@ public sealed class PromptFunction : IPromptFunction, IDisposable
         this.Name = functionName;
         this.SkillName = skillName;
         this.Description = description;
-    }
-
-    /// <summary>
-    /// Throw an exception if the function is not semantic, use this method when some logic makes sense only for semantic functions.
-    /// </summary>
-    /// <exception cref="KernelException"></exception>
-    private void VerifyIsSemantic()
-    {
-        if (this.IsSemantic) { return; }
-
-        this._logger.LogError("The function is not semantic");
-        throw new KernelException(
-            KernelException.ErrorCodes.InvalidFunctionType,
-            "Invalid operation, the method requires a semantic function");
     }
 
     [DebuggerBrowsable(DebuggerBrowsableState.Never)]

@@ -38,9 +38,9 @@ public sealed class Plan : IPlan
     /// <summary>
     /// Parameters for the plan, used to pass information to the next step
     /// </summary>
-    [JsonPropertyName("parameters")]
+    [JsonPropertyName("plan_parameters")]
     [JsonConverter(typeof(ContextVariablesConverter))]
-    public ContextVariables Parameters { get; set; } = new();
+    public ContextVariables PlanParameters { get; set; } = new();
 
     /// <summary>
     /// Outputs for the plan, used to pass information to the caller
@@ -73,6 +73,8 @@ public sealed class Plan : IPlan
     /// <inheritdoc/>
     [JsonPropertyName("description")]
     public string Description { get; set; } = string.Empty;
+
+    public IList<ParameterView> Parameters { get; set; } = new List<ParameterView>();
 
     /// <inheritdoc/>
     [JsonIgnore]
@@ -150,7 +152,7 @@ public sealed class Plan : IPlan
         this.Description = description;
         this.NextStepIndex = nextStepIndex;
         this.State = state;
-        this.Parameters = parameters;
+        this.PlanParameters = parameters;
         this.Outputs = outputs;
         this._steps.Clear();
         this.AddSteps(steps.ToArray());
@@ -465,9 +467,9 @@ public sealed class Plan : IPlan
         // - Plan.Description
 
         var input = string.Empty;
-        if (!string.IsNullOrEmpty(step.Parameters.Input))
+        if (!string.IsNullOrEmpty(step.PlanParameters.Input))
         {
-            input = this.ExpandFromVariables(variables, step.Parameters.Input);
+            input = this.ExpandFromVariables(variables, step.PlanParameters.Input);
         }
         else if (!string.IsNullOrEmpty(variables.Input))
         {
@@ -510,7 +512,7 @@ public sealed class Plan : IPlan
             }
         }
 
-        foreach (var item in step.Parameters)
+        foreach (var item in step.PlanParameters)
         {
             // Don't overwrite variable values that are already set
             if (stepVariables.ContainsKey(item.Key))

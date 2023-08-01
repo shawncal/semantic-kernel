@@ -515,7 +515,7 @@ public sealed class PlanTests
             .Returns(() => Task.FromResult(returnContext));
 
         var planStep = new Plan(mockFunction.Object);
-        planStep.Parameters.Set("type", string.Empty);
+        planStep.PlanParameters.Set("type", string.Empty);
         var plan = new Plan(string.Empty);
         plan.AddSteps(planStep);
         plan.State.Set("input", "Cleopatra");
@@ -594,7 +594,7 @@ public sealed class PlanTests
             .Returns(() => Task.FromResult(returnContext));
 
         var planStep = new Plan(mockFunction.Object);
-        planStep.Parameters.Set("type", string.Empty);
+        planStep.PlanParameters.Set("type", string.Empty);
         var plan = new Plan("A plan");
         plan.State.Set("input", "Medusa");
         plan.State.Set("type", "joke");
@@ -610,8 +610,8 @@ public sealed class PlanTests
 
         planStep = new Plan(mockFunction.Object);
         plan = new Plan("A plan");
-        planStep.Parameters.Set("input", "Medusa");
-        planStep.Parameters.Set("type", "joke");
+        planStep.PlanParameters.Set("input", "Medusa");
+        planStep.PlanParameters.Set("type", "joke");
         plan.State.Set("input", "Cleopatra"); // state input will not override parameter
         plan.State.Set("type", "poem");
         plan.AddSteps(planStep);
@@ -626,8 +626,8 @@ public sealed class PlanTests
 
         planStep = new Plan(mockFunction.Object);
         plan = new Plan("A plan");
-        planStep.Parameters.Set("input", "Cleopatra");
-        planStep.Parameters.Set("type", "poem");
+        planStep.PlanParameters.Set("input", "Cleopatra");
+        planStep.PlanParameters.Set("type", "poem");
         plan.AddSteps(planStep);
         var contextOverride = new SKContext();
         contextOverride.Variables.Set("type", "joke");
@@ -684,56 +684,56 @@ public sealed class PlanTests
         // - MiscSkill.ElementAtIndex count='3' INPUT='$OUTLINE' index='2' => CHAPTER_3_SYNOPSIS
         // - WriterSkill.NovelChapter chapterIndex='3' previousChapter='$CHAPTER_2_SYNOPSIS' INPUT='$CHAPTER_3_SYNOPSIS' theme='Children's mystery' => RESULT__CHAPTER_3
         var planStep = new Plan(outlineMock.Object);
-        planStep.Parameters.Set("input",
+        planStep.PlanParameters.Set("input",
             "NovelOutline function input.");
-        planStep.Parameters.Set("chapterCount", "3");
+        planStep.PlanParameters.Set("chapterCount", "3");
         planStep.Outputs.Add("OUTLINE");
         plan.AddSteps(planStep);
 
         planStep = new Plan(elementAtIndexMock.Object);
-        planStep.Parameters.Set("count", "3");
-        planStep.Parameters.Set("INPUT", "$OUTLINE");
-        planStep.Parameters.Set("index", "0");
+        planStep.PlanParameters.Set("count", "3");
+        planStep.PlanParameters.Set("INPUT", "$OUTLINE");
+        planStep.PlanParameters.Set("index", "0");
         planStep.Outputs.Add("CHAPTER_1_SYNOPSIS");
         plan.AddSteps(planStep);
 
         planStep = new Plan(novelChapterMock.Object);
-        planStep.Parameters.Set("chapterIndex", "1");
-        planStep.Parameters.Set("previousChapter", " ");
-        planStep.Parameters.Set("INPUT", "$CHAPTER_1_SYNOPSIS");
-        planStep.Parameters.Set("theme", "Children's mystery");
+        planStep.PlanParameters.Set("chapterIndex", "1");
+        planStep.PlanParameters.Set("previousChapter", " ");
+        planStep.PlanParameters.Set("INPUT", "$CHAPTER_1_SYNOPSIS");
+        planStep.PlanParameters.Set("theme", "Children's mystery");
         planStep.Outputs.Add("RESULT__CHAPTER_1");
         plan.Outputs.Add("RESULT__CHAPTER_1");
         plan.AddSteps(planStep);
 
         planStep = new Plan(elementAtIndexMock.Object);
-        planStep.Parameters.Set("count", "3");
-        planStep.Parameters.Set("INPUT", "$OUTLINE");
-        planStep.Parameters.Set("index", "1");
+        planStep.PlanParameters.Set("count", "3");
+        planStep.PlanParameters.Set("INPUT", "$OUTLINE");
+        planStep.PlanParameters.Set("index", "1");
         planStep.Outputs.Add("CHAPTER_2_SYNOPSIS");
         plan.AddSteps(planStep);
 
         planStep = new Plan(novelChapterMock.Object);
-        planStep.Parameters.Set("chapterIndex", "2");
-        planStep.Parameters.Set("previousChapter", "$CHAPTER_1_SYNOPSIS");
-        planStep.Parameters.Set("INPUT", "$CHAPTER_2_SYNOPSIS");
-        planStep.Parameters.Set("theme", "Children's mystery");
+        planStep.PlanParameters.Set("chapterIndex", "2");
+        planStep.PlanParameters.Set("previousChapter", "$CHAPTER_1_SYNOPSIS");
+        planStep.PlanParameters.Set("INPUT", "$CHAPTER_2_SYNOPSIS");
+        planStep.PlanParameters.Set("theme", "Children's mystery");
         planStep.Outputs.Add("RESULT__CHAPTER_2");
         plan.Outputs.Add("RESULT__CHAPTER_2");
         plan.AddSteps(planStep);
 
         planStep = new Plan(elementAtIndexMock.Object);
-        planStep.Parameters.Set("count", "3");
-        planStep.Parameters.Set("INPUT", "$OUTLINE");
-        planStep.Parameters.Set("index", "2");
+        planStep.PlanParameters.Set("count", "3");
+        planStep.PlanParameters.Set("INPUT", "$OUTLINE");
+        planStep.PlanParameters.Set("index", "2");
         planStep.Outputs.Add("CHAPTER_3_SYNOPSIS");
         plan.AddSteps(planStep);
 
         planStep = new Plan(novelChapterMock.Object);
-        planStep.Parameters.Set("chapterIndex", "3");
-        planStep.Parameters.Set("previousChapter", "$CHAPTER_2_SYNOPSIS");
-        planStep.Parameters.Set("INPUT", "$CHAPTER_3_SYNOPSIS");
-        planStep.Parameters.Set("theme", "Children's mystery");
+        planStep.PlanParameters.Set("chapterIndex", "3");
+        planStep.PlanParameters.Set("previousChapter", "$CHAPTER_2_SYNOPSIS");
+        planStep.PlanParameters.Set("INPUT", "$CHAPTER_3_SYNOPSIS");
+        planStep.PlanParameters.Set("theme", "Children's mystery");
         planStep.Outputs.Add("CHAPTER_3");
         plan.Outputs.Add("CHAPTER_3");
         plan.AddSteps(planStep);
@@ -773,9 +773,9 @@ Previously:Outline section #1 of 3: Here is a 3 chapter outline about NovelOutli
         var plan = new Plan("A plan with steps that have variables with a $ in them but not associated with an output");
 
         var planStep = new Plan(functionMock.Object);
-        planStep.Parameters.Set("input",
+        planStep.PlanParameters.Set("input",
             "Function input.");
-        planStep.Parameters.Set("payload", @"{""prop"":""value"", ""$prop"": 3, ""prop2"": ""my name is $pop and $var""}");
+        planStep.PlanParameters.Set("payload", @"{""prop"":""value"", ""$prop"": 3, ""prop2"": ""my name is $pop and $var""}");
         plan.AddSteps(planStep);
         plan.State.Set("var", "foobar");
 
