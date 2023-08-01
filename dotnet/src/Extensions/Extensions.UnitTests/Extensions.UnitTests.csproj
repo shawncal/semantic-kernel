@@ -28,7 +28,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Functions.Prompt\Functions.Prompt.csproj" />
     <ProjectReference Include="..\Planning.ActionPlanner\Planning.ActionPlanner.csproj" />
     <ProjectReference Include="..\Planning.SequentialPlanner\Planning.SequentialPlanner.csproj" />
     <ProjectReference Include="..\Planning.StepwisePlanner\Planning.StepwisePlanner.csproj" />

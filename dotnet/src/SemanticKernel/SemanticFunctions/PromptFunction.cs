@@ -15,12 +15,7 @@ using Microsoft.SemanticKernel.Diagnostics;
 using Microsoft.SemanticKernel.Orchestration;
 using Microsoft.SemanticKernel.SkillDefinition;
 
-#pragma warning disable IDE0130 // Namespace does not match folder structure
-
-// TODO: For refactor only. Update namespace to match projec before checkin !!!!!!
-
 namespace Microsoft.SemanticKernel.SemanticFunctions;
-#pragma warning restore IDE0130 // Namespace does not match folder structure
 
 #pragma warning disable format
 
@@ -42,7 +37,7 @@ public sealed class PromptFunction : IPromptFunction, IDisposable
     public string Description { get; }
 
     /// <inheritdoc/>
-    public CompleteRequestSettings RequestSettings => this._aiRequestSettings;
+    public CompleteRequestSettings DefaultRequestSettings => this._defaultRequestSettings;
 
     /// <summary>
     /// List of function parameters
@@ -143,36 +138,26 @@ public sealed class PromptFunction : IPromptFunction, IDisposable
     }
 
     /// <inheritdoc/>
-    public async Task<SKContext> InvokeAsync(
+    public Task<SKContext> InvokeAsync(SKContext context, CancellationToken cancellationToken = default)
+    {
+        return this.InvokeAsync(context, null, cancellationToken);
+    }
+
+    /// <inheritdoc/>
+    public Task<SKContext> InvokeAsync(
         SKContext context,
-        CompleteRequestSettings? settings = null,
+        CompleteRequestSettings? settings,
         CancellationToken cancellationToken = default)
     {
         this.AddDefaultValues(context.Variables);
 
-        return await this._function(this._aiService?.Value, settings ?? this._aiRequestSettings, context, cancellationToken).ConfigureAwait(false);
+        return this._function(this._aiService?.Value, settings ?? this._defaultRequestSettings, context, cancellationToken);
     }
 
     /// <inheritdoc/>
     public ISKFunction SetDefaultSkillCollection(IReadOnlySkillCollection skills)
     {
         this._skillCollection = skills;
-        return this;
-    }
-
-    /// <inheritdoc/>
-    public IPromptFunction SetAIService(Func<ITextCompletion> serviceFactory)
-    {
-        Verify.NotNull(serviceFactory);
-        this._aiService = new Lazy<ITextCompletion>(serviceFactory);
-        return this;
-    }
-
-    /// <inheritdoc/>
-    public IPromptFunction SetAIConfiguration(CompleteRequestSettings settings)
-    {
-        Verify.NotNull(settings);
-        this._aiRequestSettings = settings;
         return this;
     }
 
@@ -207,15 +192,7 @@ public sealed class PromptFunction : IPromptFunction, IDisposable
     private readonly ILogger _logger;
     private IReadOnlySkillCollection? _skillCollection;
     private Lazy<ITextCompletion>? _aiService = null;
-    private CompleteRequestSettings _aiRequestSettings = new();
-
-    private struct MethodDetails
-    {
-        public Func<ITextCompletion?, CompleteRequestSettings?, SKContext, CancellationToken, Task<SKContext>> Function { get; set; }
-        public List<ParameterView> Parameters { get; set; }
-        public string Name { get; set; }
-        public string Description { get; set; }
-    }
+    private CompleteRequestSettings _defaultRequestSettings = new();
 
     private static async Task<string> GetCompletionsResultContentAsync(IReadOnlyList<ITextResult> completions, CancellationToken cancellationToken = default)
     {
@@ -259,11 +236,6 @@ public sealed class PromptFunction : IPromptFunction, IDisposable
                 variables[parameter.Name] = parameter.DefaultValue;
             }
         }
-    }
-
-    public Task<SKContext> InvokeAsync(SKContext context, CancellationToken cancellationToken = default)
-    {
-        throw new NotImplementedException();
     }
 
     #endregion
