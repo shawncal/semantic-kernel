@@ -3,6 +3,7 @@
 using System;
 using System.Threading.Tasks;
 using Microsoft.SemanticKernel;
+using Microsoft.SemanticKernel.Memory;
 using RepoUtils;
 
 // ReSharper disable once InconsistentNaming
@@ -23,15 +24,15 @@ public static class Example15_MemorySkill
 
         // ========= Store memories using the kernel =========
 
-        await kernel.Memory.SaveInformationAsync(MemoryCollectionName, id: "info1", text: "My name is Andrea");
-        await kernel.Memory.SaveInformationAsync(MemoryCollectionName, id: "info2", text: "I work as a tourist operator");
-        await kernel.Memory.SaveInformationAsync(MemoryCollectionName, id: "info3", text: "I've been living in Seattle since 2005");
-        await kernel.Memory.SaveInformationAsync(MemoryCollectionName, id: "info4", text: "I visited France and Italy five times since 2015");
+        await kernel.GetMemory().SaveInformationAsync(MemoryCollectionName, id: "info1", text: "My name is Andrea");
+        await kernel.GetMemory().SaveInformationAsync(MemoryCollectionName, id: "info2", text: "I work as a tourist operator");
+        await kernel.GetMemory().SaveInformationAsync(MemoryCollectionName, id: "info3", text: "I've been living in Seattle since 2005");
+        await kernel.GetMemory().SaveInformationAsync(MemoryCollectionName, id: "info4", text: "I visited France and Italy five times since 2015");
 
         // ========= Store memories using semantic function =========
 
         // Add Memory as a skill for other functions
-        var memorySkill = new TextMemoryPlugin(kernel.Memory);
+        var memorySkill = new TextMemoryPlugin(kernel.GetMemory());
         kernel.ImportSkill(memorySkill);
 
         // Build a semantic function that saves info to memory

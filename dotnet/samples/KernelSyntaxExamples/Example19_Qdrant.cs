@@ -3,6 +3,7 @@
 using System;
 using System.Threading.Tasks;
 using Microsoft.SemanticKernel;
+using Microsoft.SemanticKernel.AI.Embeddings;
 using Microsoft.SemanticKernel.Connectors.Memory.Qdrant;
 using Microsoft.SemanticKernel.Memory;
 using RepoUtils;
@@ -19,9 +20,14 @@ public static class Example19_Qdrant
             .WithLogger(ConsoleLogger.Logger)
             .WithOpenAIChatCompletionService(TestConfiguration.OpenAI.ChatModelId, TestConfiguration.OpenAI.ApiKey)
             .WithOpenAITextEmbeddingGenerationService(TestConfiguration.OpenAI.EmbeddingModelId, TestConfiguration.OpenAI.ApiKey)
-            .WithMemoryStorage(memoryStore)
             //.WithQdrantMemoryStore(TestConfiguration.Qdrant.Endpoint, 1536) // This method offers an alternative approach to registering Qdrant memory store.
             .Build();
+
+        // Get default embedding generator
+        var embeddingGenerator = kernel.GetService<ITextEmbeddingGeneration>();
+
+        TextMemoryPlugin textMemory = new TextMemoryPlugin(memoryStore, embeddingGenerator);
+        kernel.AddTextMemoryPlugin(memoryStore);
 
         Console.WriteLine("== Printing Collections in DB ==");
         var collections = memoryStore.GetCollectionsAsync();
@@ -32,9 +38,9 @@ public static class Example19_Qdrant
 
         Console.WriteLine("== Adding Memories ==");
 
-        var key1 = await kernel.Memory.SaveInformationAsync(MemoryCollectionName, id: "cat1", text: "british short hair");
-        var key2 = await kernel.Memory.SaveInformationAsync(MemoryCollectionName, id: "cat2", text: "orange tabby");
-        var key3 = await kernel.Memory.SaveInformationAsync(MemoryCollectionName, id: "cat3", text: "norwegian forest cat");
+        var key1 = await kernel.GetMemory().SaveInformationAsync(MemoryCollectionName, id: "cat1", text: "british short hair");
+        var key2 = await kernel.GetMemory().SaveInformationAsync(MemoryCollectionName, id: "cat2", text: "orange tabby");
+        var key3 = await kernel.GetMemory().SaveInformationAsync(MemoryCollectionName, id: "cat3", text: "norwegian forest cat");
 
         Console.WriteLine("== Printing Collections in DB ==");
         collections = memoryStore.GetCollectionsAsync();
@@ -44,7 +50,7 @@ public static class Example19_Qdrant
         }
 
         Console.WriteLine("== Retrieving Memories Through the Kernel ==");
-        MemoryQueryResult? lookup = await kernel.Memory.GetAsync(MemoryCollectionName, "cat1");
+        MemoryQueryResult? lookup = await kernel.GetMemory().GetAsync(MemoryCollectionName, "cat1");
         Console.WriteLine(lookup != null ? lookup.Metadata.Text : "ERROR: memory not found");
 
         Console.WriteLine("== Retrieving Memories Directly From the Store ==");
@@ -56,7 +62,7 @@ public static class Example19_Qdrant
         Console.WriteLine(memory3 != null ? memory3.Metadata.Text : "ERROR: memory not found");
 
         Console.WriteLine("== Similarity Searching Memories: My favorite color is orange ==");
-        var searchResults = kernel.Memory.SearchAsync(MemoryCollectionName, "My favorite color is orange", limit: 3, minRelevanceScore: 0.8);
+        var searchResults = kernel.GetMemory().SearchAsync(MemoryCollectionName, "My favorite color is orange", limit: 3, minRelevanceScore: 0.8);
 
         await foreach (var item in searchResults)
         {

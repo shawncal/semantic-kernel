@@ -39,9 +39,9 @@ public static class Example47_Redis
 
         Console.WriteLine("== Adding Memories ==");
 
-        var key1 = await kernel.Memory.SaveInformationAsync(MemoryCollectionName, id: "cat1", text: "british short hair");
-        var key2 = await kernel.Memory.SaveInformationAsync(MemoryCollectionName, id: "cat2", text: "orange tabby");
-        var key3 = await kernel.Memory.SaveInformationAsync(MemoryCollectionName, id: "cat3", text: "norwegian forest cat");
+        var key1 = await kernel.GetMemory().SaveInformationAsync(MemoryCollectionName, id: "cat1", text: "british short hair");
+        var key2 = await kernel.GetMemory().SaveInformationAsync(MemoryCollectionName, id: "cat2", text: "orange tabby");
+        var key3 = await kernel.GetMemory().SaveInformationAsync(MemoryCollectionName, id: "cat3", text: "norwegian forest cat");
 
         Console.WriteLine("== Printing Collections in DB ==");
         collections = memoryStore.GetCollectionsAsync();
@@ -51,7 +51,7 @@ public static class Example47_Redis
         }
 
         Console.WriteLine("== Retrieving Memories Through the Kernel ==");
-        MemoryQueryResult? lookup = await kernel.Memory.GetAsync(MemoryCollectionName, "cat1");
+        MemoryQueryResult? lookup = await kernel.GetMemory().GetAsync(MemoryCollectionName, "cat1");
         Console.WriteLine(lookup != null ? lookup.Metadata.Text : "ERROR: memory not found");
 
         Console.WriteLine("== Retrieving Memories Directly From the Store ==");
@@ -63,7 +63,7 @@ public static class Example47_Redis
         Console.WriteLine(memory3 != null ? memory3.Metadata.Text : "ERROR: memory not found");
 
         Console.WriteLine("== Similarity Searching Memories: My favorite color is orange ==");
-        var searchResults = kernel.Memory.SearchAsync(MemoryCollectionName, "My favorite color is orange", limit: 3, minRelevanceScore: 0.8);
+        var searchResults = kernel.GetMemory().SearchAsync(MemoryCollectionName, "My favorite color is orange", limit: 3, minRelevanceScore: 0.8);
 
         await foreach (var item in searchResults)
         {

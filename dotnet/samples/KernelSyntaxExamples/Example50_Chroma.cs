@@ -39,9 +39,9 @@ public static class Example50_Chroma
 
         Console.WriteLine("== Adding Memories ==");
 
-        var key1 = await kernel.Memory.SaveInformationAsync(MemoryCollectionName, id: Guid.NewGuid().ToString(), text: "british short hair");
-        var key2 = await kernel.Memory.SaveInformationAsync(MemoryCollectionName, id: Guid.NewGuid().ToString(), text: "orange tabby");
-        var key3 = await kernel.Memory.SaveInformationAsync(MemoryCollectionName, id: Guid.NewGuid().ToString(), text: "norwegian forest cat");
+        var key1 = await kernel.GetMemory().SaveInformationAsync(MemoryCollectionName, id: Guid.NewGuid().ToString(), text: "british short hair");
+        var key2 = await kernel.GetMemory().SaveInformationAsync(MemoryCollectionName, id: Guid.NewGuid().ToString(), text: "orange tabby");
+        var key3 = await kernel.GetMemory().SaveInformationAsync(MemoryCollectionName, id: Guid.NewGuid().ToString(), text: "norwegian forest cat");
 
         Console.WriteLine("== Printing Collections in DB ==");
         collections = memoryStore.GetCollectionsAsync();
@@ -51,11 +51,11 @@ public static class Example50_Chroma
         }
 
         Console.WriteLine("== Retrieving Memories Through the Kernel ==");
-        MemoryQueryResult? lookup = await kernel.Memory.GetAsync(MemoryCollectionName, key1);
+        MemoryQueryResult? lookup = await kernel.GetMemory().GetAsync(MemoryCollectionName, key1);
         Console.WriteLine(lookup != null ? lookup.Metadata.Text : "ERROR: memory not found");
 
         Console.WriteLine("== Similarity Searching Memories: My favorite color is orange ==");
-        var searchResults = kernel.Memory.SearchAsync(MemoryCollectionName, "My favorite color is orange", limit: 3, minRelevanceScore: 0.6);
+        var searchResults = kernel.GetMemory().SearchAsync(MemoryCollectionName, "My favorite color is orange", limit: 3, minRelevanceScore: 0.6);
 
         await foreach (var item in searchResults)
         {

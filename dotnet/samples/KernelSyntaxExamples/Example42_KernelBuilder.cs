@@ -93,7 +93,8 @@ public static class Example42_KernelBuilder
         IAIServiceProvider aiServiceProvider = aiServices.Build();
 
         // Create kernel manually injecting all the dependencies
-        using var kernel3 = new Kernel(skills, aiServiceProvider, templateEngine, memory, kernelConfig, logger);
+        using var kernel3 = new Kernel(skills, aiServiceProvider, templateEngine, kernelConfig, logger);
+        kernel3.AddTextMemoryPlugin(memory);
 
         // ==========================================================================================================
         // The kernel builder purpose is to simplify this process, automating how dependencies
@@ -102,17 +103,16 @@ public static class Example42_KernelBuilder
         // Example: how to use a custom memory and configure Azure OpenAI
         var kernel4 = Kernel.Builder
             .WithLogger(NullLogger.Instance)
-            .WithMemory(memory)
             .WithAzureChatCompletionService(
                 deploymentName: azureOpenAIChatCompletionDeployment,
                 endpoint: azureOpenAIEndpoint,
                 apiKey: azureOpenAIKey)
             .Build();
+        kernel4.AddTextMemoryPlugin(memory);
 
         // Example: how to use a custom memory storage
         var kernel6 = Kernel.Builder
             .WithLogger(NullLogger.Instance)
-            .WithMemoryStorage(memoryStorage) // Custom memory storage
             .WithAzureChatCompletionService(
                 deploymentName: azureOpenAIChatCompletionDeployment,
                 endpoint: azureOpenAIEndpoint,
@@ -122,6 +122,7 @@ public static class Example42_KernelBuilder
                 endpoint: azureOpenAIEndpoint,
                 apiKey: azureOpenAIKey) // This will be used when indexing memory records
             .Build();
+        kernel6.AddTextMemoryPlugin(memoryStorage);
 
         // ==========================================================================================================
         // The AI services are defined with the builder

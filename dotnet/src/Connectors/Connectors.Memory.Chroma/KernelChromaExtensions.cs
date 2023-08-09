@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
 using System.Net.Http;
+using Microsoft.SemanticKernel.AI.Embeddings;
 using Microsoft.SemanticKernel.Connectors.Memory.Chroma;
 
 #pragma warning disable IDE0130
@@ -51,5 +52,44 @@ public static class ChromaKernelBuilderExtensions
         });
 
         return builder;
+    }
+
+    /// <summary>
+    /// Registers Chroma memory connector.
+    /// </summary>
+    /// <param name="kernel">The <see cref="IKernel"/> instance.</param>
+    /// <param name="embeddingGenerator">The <see cref="ITextEmbeddingGeneration"/> instance used to generate embeddings for this memory plugin.</param>
+    /// <param name="endpoint">Chroma server endpoint URL.</param>
+    /// <returns>Self instance.</returns>
+    public static IKernel AddChromaMemoryPlugin(this IKernel kernel, ITextEmbeddingGeneration embeddingGenerator, string endpoint)
+    {
+        var memoryStore = new ChromaMemoryStore(
+            HttpClientProvider.GetHttpClient(kernel.Config, null, kernel.Logger),
+            endpoint,
+            kernel.Logger);
+
+        kernel.AddTextMemoryPlugin(memoryStore, embeddingGenerator);
+
+        return kernel;
+    }
+
+    /// <summary>
+    /// Registers Chroma memory connector.
+    /// </summary>
+    /// <param name="kernel">The <see cref="IKernel"/> instance.</param>
+    /// <param name="embeddingGenerator">The <see cref="ITextEmbeddingGeneration"/> instance used to generate embeddings for this memory plugin.</param>
+    /// <param name="httpClient">The <see cref="HttpClient"/> instance used for making HTTP requests.</param>
+    /// <param name="endpoint">Chroma server endpoint URL. If not specified, the base address of the HTTP client is used.</param>
+    /// <returns>Self instance.</returns>
+    public static IKernel AddChromaMemoryPlugin(this IKernel kernel, ITextEmbeddingGeneration embeddingGenerator, HttpClient httpClient, string? endpoint = null)
+    {
+        var memoryStore = new ChromaMemoryStore(
+            HttpClientProvider.GetHttpClient(kernel.Config, httpClient, kernel.Logger),
+            endpoint,
+            kernel.Logger);
+
+        kernel.AddTextMemoryPlugin(memoryStore, embeddingGenerator);
+
+        return kernel;
     }
 }

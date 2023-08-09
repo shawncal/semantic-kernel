@@ -191,7 +191,7 @@ internal static class Example12_SequentialPlanner
                 TestConfiguration.AzureOpenAIEmbeddings.ApiKey)
             .Build();
 
-        kernel.UseMemory(new VolatileMemoryStore());
+        kernel.AddTextMemoryPlugin(new VolatileMemoryStore());
 
         string folder = RepoFiles.SampleSkillsPath();
         kernel.ImportSemanticSkillFromDirectory(folder,
@@ -214,7 +214,7 @@ internal static class Example12_SequentialPlanner
         var goal = "Create a book with 3 chapters about a group of kids in a club called 'The Thinking Caps.'";
 
         // IMPORTANT: To use memory and embeddings to find relevant skills in the planner, set the 'Memory' property on the planner config.
-        var planner = new SequentialPlanner(kernel, new SequentialPlannerConfig { RelevancyThreshold = 0.5 }); // Memory = kernel.Memory
+        var planner = new SequentialPlanner(kernel, new SequentialPlannerConfig { RelevancyThreshold = 0.5 }); // Memory = kernel.GetMemory()
 
         var plan = await planner.CreatePlanAsync(goal);
 

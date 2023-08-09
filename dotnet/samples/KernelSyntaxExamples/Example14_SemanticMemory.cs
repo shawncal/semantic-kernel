@@ -107,7 +107,7 @@ public static class Example14_SemanticMemory
     {
         Console.WriteLine("\nQuery: " + query + "\n");
 
-        var memories = kernel.Memory.SearchAsync(MemoryCollectionName, query, limit: 2, minRelevanceScore: 0.5);
+        var memories = kernel.GetMemory().SearchAsync(MemoryCollectionName, query, limit: 2, minRelevanceScore: 0.5);
 
         int i = 0;
         await foreach (MemoryQueryResult memory in memories)
@@ -137,7 +137,7 @@ public static class Example14_SemanticMemory
         var i = 0;
         foreach (var entry in githubFiles)
         {
-            await kernel.Memory.SaveReferenceAsync(
+            await kernel.GetMemory().SaveReferenceAsync(
                 collection: MemoryCollectionName,
                 externalSourceName: "GitHub",
                 externalId: entry.Key,

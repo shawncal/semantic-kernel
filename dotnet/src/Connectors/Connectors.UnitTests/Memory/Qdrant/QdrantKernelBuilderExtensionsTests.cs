@@ -35,7 +35,7 @@ public sealed class QdrantKernelBuilderExtensionsTests : IDisposable
         var kernel = builder.Build(); //This call triggers the internal factory registered by WithQdrantMemoryStore method to create an instance of the QdrantMemoryStore class.
 
         //Act
-        await kernel.Memory.GetCollectionsAsync(); //This call triggers a subsequent call to Qdrant memory store.
+        await kernel.GetMemory().GetCollectionsAsync(); //This call triggers a subsequent call to Qdrant memory store.
 
         //Assert
         Assert.Equal("https://fake-random-qdrant-host/collections", this.messageHandlerStub?.RequestUri?.AbsoluteUri);

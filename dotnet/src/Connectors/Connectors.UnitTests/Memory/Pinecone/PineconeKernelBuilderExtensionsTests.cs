@@ -35,7 +35,7 @@ public sealed class PineconeKernelBuilderExtensionsTests : IDisposable
         var kernel = builder.Build(); //This call triggers the internal factory registered by WithPineconeMemoryStore method to create an instance of the PineconeMemoryStore class.
 
         //Act
-        await kernel.Memory.GetCollectionsAsync(); //This call triggers a subsequent call to Pinecone memory store.
+        await kernel.GetMemory().GetCollectionsAsync(); //This call triggers a subsequent call to Pinecone memory store.
 
         //Assert
         Assert.Equal("https://controller.fake-environment.pinecone.io/databases", this.messageHandlerStub?.RequestUri?.AbsoluteUri);

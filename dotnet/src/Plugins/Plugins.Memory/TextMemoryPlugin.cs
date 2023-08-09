@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.SemanticKernel.AI.Embeddings;
 using Microsoft.SemanticKernel.Diagnostics;
 using Microsoft.SemanticKernel.SkillDefinition;
 
@@ -56,6 +57,14 @@ public sealed class TextMemoryPlugin
     public TextMemoryPlugin(ISemanticTextMemory memory)
     {
         this._memory = memory;
+    }
+
+    /// <summary>
+    /// Creates a new instance of the TextMemorySkill
+    /// </summary>
+    public TextMemoryPlugin(IMemoryStore store, ITextEmbeddingGeneration embeddingGenerator)
+        : this(new SemanticTextMemory(store, embeddingGenerator))
+    {
     }
 
     /// <summary>

@@ -47,7 +47,7 @@ public sealed class WeaviateKernelBuilderExtensionsTests : IDisposable
         var kernel = builder.Build(); //This call triggers the internal factory registered by WithWeaviateMemoryStore method to create an instance of the WeaviateMemoryStore class.
 
         //Act
-        await kernel.Memory.GetAsync("fake-collection", "fake-key"); //This call triggers a subsequent call to Weaviate memory store.
+        await kernel.GetMemory().GetAsync("fake-collection", "fake-key"); //This call triggers a subsequent call to Weaviate memory store.
 
         //Assert
         Assert.Equal("https://fake-random-test-weaviate-host/objects/fake-key", this.messageHandlerStub?.RequestUri?.AbsoluteUri);

@@ -54,12 +54,12 @@ public static class Example38_Pinecone
 
         string additionalMetadata = System.Text.Json.JsonSerializer.Serialize(metadata);
 
-        string key1 = await kernel.Memory.SaveInformationAsync(MemoryCollectionName, "british short hair", "cat1", null, additionalMetadata);
-        string key2 = await kernel.Memory.SaveInformationAsync(MemoryCollectionName, "orange tabby", "cat2", null, additionalMetadata);
-        string key3 = await kernel.Memory.SaveInformationAsync(MemoryCollectionName, "norwegian forest cat", "cat3", null, additionalMetadata);
+        string key1 = await kernel.GetMemory().SaveInformationAsync(MemoryCollectionName, "british short hair", "cat1", null, additionalMetadata);
+        string key2 = await kernel.GetMemory().SaveInformationAsync(MemoryCollectionName, "orange tabby", "cat2", null, additionalMetadata);
+        string key3 = await kernel.GetMemory().SaveInformationAsync(MemoryCollectionName, "norwegian forest cat", "cat3", null, additionalMetadata);
 
         Console.WriteLine("== Retrieving Memories Through the Kernel ==");
-        MemoryQueryResult? lookup = await kernel.Memory.GetAsync(MemoryCollectionName, "cat1");
+        MemoryQueryResult? lookup = await kernel.GetMemory().GetAsync(MemoryCollectionName, "cat1");
         Console.WriteLine(lookup != null ? lookup.Metadata.Text : "ERROR: memory not found");
 
         Console.WriteLine("== Retrieving Memories Directly From the Store ==");
@@ -72,7 +72,7 @@ public static class Example38_Pinecone
         Console.WriteLine(memory3 != null ? memory3.Metadata.Text : "ERROR: memory not found");
 
         Console.WriteLine("== Similarity Searching Memories: My favorite color is orange ==");
-        IAsyncEnumerable<MemoryQueryResult> searchResults = kernel.Memory.SearchAsync(MemoryCollectionName, "My favorite color is orange", 1, 0.8);
+        IAsyncEnumerable<MemoryQueryResult> searchResults = kernel.GetMemory().SearchAsync(MemoryCollectionName, "My favorite color is orange", 1, 0.8);
 
         await foreach (MemoryQueryResult item in searchResults)
         {

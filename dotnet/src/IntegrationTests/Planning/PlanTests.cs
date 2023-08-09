@@ -7,6 +7,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.SemanticKernel;
+using Microsoft.SemanticKernel.Memory;
 using Microsoft.SemanticKernel.Orchestration;
 using Microsoft.SemanticKernel.Planning;
 using SemanticKernel.IntegrationTests.Fakes;
@@ -496,11 +497,12 @@ public sealed class PlanTests : IDisposable
                 .WithAzureTextEmbeddingGenerationService(
                     deploymentName: azureOpenAIEmbeddingsConfiguration.DeploymentName,
                     endpoint: azureOpenAIEmbeddingsConfiguration.Endpoint,
-                    apiKey: azureOpenAIEmbeddingsConfiguration.ApiKey)
-                .WithMemoryStorage(new VolatileMemoryStore());
+                    apiKey: azureOpenAIEmbeddingsConfiguration.ApiKey);
         }
 
         var kernel = builder.Build();
+
+        kernel.AddTextMemoryPlugin(new VolatileMemoryStore());
 
         // Import all sample skills available for demonstration purposes.
         TestHelpers.ImportSampleSkills(kernel);

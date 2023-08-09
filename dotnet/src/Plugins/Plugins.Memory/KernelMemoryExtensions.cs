@@ -13,7 +13,13 @@ namespace Microsoft.SemanticKernel;
 public static class KernelMemoryExtensions
 {
     /// <inheritdoc/>
-    public static void RegisterMemory(this IKernel kernel, ISemanticTextMemory memory)
+    public static void AddTextMemoryPlugin(this IKernel kernel, TextMemoryPlugin memoryPlugin)
+    {
+        kernel.ImportSkill(memoryPlugin);
+    }
+
+    /// <inheritdoc/>
+    public static void AddTextMemoryPlugin(this IKernel kernel, ISemanticTextMemory memory)
     {
         kernel.ImportSkill(new TextMemoryPlugin(memory));
     }
@@ -24,25 +30,31 @@ public static class KernelMemoryExtensions
     /// <param name="kernel">Kernel instance</param>
     /// <param name="storage">Memory storage</param>
     /// <param name="embeddingsServiceId">Kernel service id for embedding generation</param>
-    public static void UseMemory(this IKernel kernel, IMemoryStore storage, string? embeddingsServiceId = null)
+    public static void AddTextMemoryPlugin(this IKernel kernel, IMemoryStore storage, string? embeddingsServiceId = null)
     {
         var embeddingGenerator = kernel.GetService<ITextEmbeddingGeneration>(embeddingsServiceId);
 
-        UseMemory(kernel, embeddingGenerator, storage);
+        AddTextMemoryPlugin(kernel, storage, embeddingGenerator);
     }
 
     /// <summary>
     /// Set the semantic memory to use the given memory storage and embedding generator.
     /// </summary>
     /// <param name="kernel">Kernel instance</param>
-    /// <param name="embeddingGenerator">Embedding generator</param>
     /// <param name="storage">Memory storage</param>
+    /// <param name="embeddingGenerator">Embedding generator</param>
     [SuppressMessage("Reliability", "CA2000:Dispose objects before losing scope", Justification = "The embeddingGenerator object is disposed by the kernel")]
-    public static void UseMemory(this IKernel kernel, ITextEmbeddingGeneration embeddingGenerator, IMemoryStore storage)
+    public static void AddTextMemoryPlugin(this IKernel kernel, IMemoryStore storage, ITextEmbeddingGeneration embeddingGenerator)
     {
         Verify.NotNull(storage);
         Verify.NotNull(embeddingGenerator);
 
-        kernel.RegisterMemory(new SemanticTextMemory(storage, embeddingGenerator));
+        kernel.AddTextMemoryPlugin(new SemanticTextMemory(storage, embeddingGenerator));
+    }
+
+    /// <inheritdoc/>
+    public static ISemanticTextMemory? GetMemory(this IKernel kernel)
+    {
+        return null;
     }
 }
