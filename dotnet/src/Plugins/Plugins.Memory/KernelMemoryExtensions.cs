@@ -1,8 +1,8 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
-using System.Diagnostics.CodeAnalysis;
 using Microsoft.SemanticKernel.AI.Embeddings;
 using Microsoft.SemanticKernel.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.SemanticKernel.Memory;
 
 #pragma warning disable IDE0130
@@ -10,11 +10,14 @@ using Microsoft.SemanticKernel.Memory;
 namespace Microsoft.SemanticKernel;
 #pragma warning restore IDE0130
 
-/// <summary>
-/// Kernel extension to configure the semantic memory with custom settings
-/// </summary>
-public static class MemoryConfiguration
+public static class KernelMemoryExtensions
 {
+    /// <inheritdoc/>
+    public static void RegisterMemory(this IKernel kernel, ISemanticTextMemory memory)
+    {
+        kernel.ImportSkill(new TextMemoryPlugin(memory));
+    }
+
     /// <summary>
     /// Set the semantic memory to use the given memory storage and embeddings service.
     /// </summary>

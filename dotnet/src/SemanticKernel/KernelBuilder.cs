@@ -4,7 +4,6 @@ using System;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.SemanticKernel.Diagnostics;
-using Microsoft.SemanticKernel.Memory;
 using Microsoft.SemanticKernel.Reliability;
 using Microsoft.SemanticKernel.Services;
 using Microsoft.SemanticKernel.SkillDefinition;
@@ -18,9 +17,7 @@ namespace Microsoft.SemanticKernel;
 public sealed class KernelBuilder
 {
     private KernelConfig _config = new();
-    private Func<ISemanticTextMemory> _memoryFactory = () => NullMemory.Instance;
     private ILogger _logger = NullLogger.Instance;
-    private Func<IMemoryStore>? _memoryStorageFactory = null;
     private IDelegatingHandlerFactory? _httpHandlerFactory = null;
     private IPromptTemplateEngine? _promptTemplateEngine;
     private readonly AIServiceCollection _aiServices = new();
@@ -50,16 +47,9 @@ public sealed class KernelBuilder
             new SkillCollection(this._logger),
             this._aiServices.Build(),
             this._promptTemplateEngine ?? new PromptTemplateEngine(this._logger),
-            this._memoryFactory.Invoke(),
             this._config,
             this._logger
         );
-
-        // TODO: decouple this from 'UseMemory' kernel extension
-        if (this._memoryStorageFactory != null)
-        {
-            instance.UseMemory(this._memoryStorageFactory.Invoke());
-        }
 
         return instance;
     }
@@ -81,10 +71,9 @@ public sealed class KernelBuilder
     /// </summary>
     /// <param name="memory">Semantic text memory entity to add.</param>
     /// <returns>Updated kernel builder including the semantic text memory entity.</returns>
-    public KernelBuilder WithMemory(ISemanticTextMemory memory)
+    [Obsolete("Include Plugins.Memory package and use IKernel.WithMemory(...) instead. See aka.ms/memory-plugin")]
+    public KernelBuilder WithMemory(object memory)
     {
-        Verify.NotNull(memory);
-        this._memoryFactory = () => memory;
         return this;
     }
 
@@ -93,10 +82,9 @@ public sealed class KernelBuilder
     /// </summary>
     /// <param name="factory">The store factory.</param>
     /// <returns>Updated kernel builder including the semantic text memory entity.</returns>
-    public KernelBuilder WithMemory<TStore>(Func<(ILogger Logger, KernelConfig Config), TStore> factory) where TStore : ISemanticTextMemory
+    [Obsolete("Include Plugins.Memory package and use IKernel.WithMemory(...) instead. See aka.ms/memory-plugin")]
+    public KernelBuilder WithMemory<TStore>(Func<(ILogger Logger, KernelConfig Config), TStore> factory)
     {
-        Verify.NotNull(factory);
-        this._memoryFactory = () => factory((this._logger, this._config));
         return this;
     }
 
@@ -105,10 +93,9 @@ public sealed class KernelBuilder
     /// </summary>
     /// <param name="storage">Storage to add.</param>
     /// <returns>Updated kernel builder including the memory storage.</returns>
-    public KernelBuilder WithMemoryStorage(IMemoryStore storage)
+    [Obsolete("Include Plugins.Memory package and use IKernel.WithMemory(...) instead. See aka.ms/memory-plugin")]
+    public KernelBuilder WithMemoryStorage(object storage)
     {
-        Verify.NotNull(storage);
-        this._memoryStorageFactory = () => storage;
         return this;
     }
 
@@ -117,10 +104,9 @@ public sealed class KernelBuilder
     /// </summary>
     /// <param name="factory">The storage factory.</param>
     /// <returns>Updated kernel builder including the memory storage.</returns>
-    public KernelBuilder WithMemoryStorage<TStore>(Func<(ILogger Logger, KernelConfig Config), TStore> factory) where TStore : IMemoryStore
+    [Obsolete("Include Plugins.Memory package and use IKernel.WithMemory(...) instead. See aka.ms/memory-plugin")]
+    public KernelBuilder WithMemoryStorage<TStore>(Func<(ILogger Logger, KernelConfig Config), TStore> factory)
     {
-        Verify.NotNull(factory);
-        this._memoryStorageFactory = () => factory((this._logger, this._config));
         return this;
     }
 

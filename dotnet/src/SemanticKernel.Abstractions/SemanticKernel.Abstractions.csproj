@@ -28,4 +28,8 @@
     <InternalsVisibleTo Include="Extensions.UnitTests" />
     <InternalsVisibleTo Include="DynamicProxyGenAssembly2" /> <!-- Moq -->
   </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Memory\" />
+  </ItemGroup>
 </Project>

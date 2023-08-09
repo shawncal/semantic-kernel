@@ -10,7 +10,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.SemanticKernel.AI;
 using Microsoft.SemanticKernel.AI.TextCompletion;
 using Microsoft.SemanticKernel.Diagnostics;
-using Microsoft.SemanticKernel.Memory;
 using Microsoft.SemanticKernel.Orchestration;
 using Microsoft.SemanticKernel.SemanticFunctions;
 using Microsoft.SemanticKernel.Services;
@@ -40,7 +39,8 @@ public sealed class Kernel : IKernel, IDisposable
     public ILogger Logger { get; }
 
     /// <inheritdoc/>
-    public ISemanticTextMemory Memory => this._memory;
+    [Obsolete("Memory no longer stored on Kernel directly. Use TextMemoryPlugin instead. See aka.ms/memory-plugin")]
+    public object Memory => null!;
 
     /// <inheritdoc/>
     public IReadOnlySkillCollection Skills => this._skillCollection;
@@ -59,21 +59,18 @@ public sealed class Kernel : IKernel, IDisposable
     /// <param name="skillCollection"></param>
     /// <param name="aiServiceProvider"></param>
     /// <param name="promptTemplateEngine"></param>
-    /// <param name="memory"></param>
     /// <param name="config"></param>
     /// <param name="logger"></param>
     public Kernel(
         ISkillCollection skillCollection,
         IAIServiceProvider aiServiceProvider,
         IPromptTemplateEngine promptTemplateEngine,
-        ISemanticTextMemory memory,
         KernelConfig config,
         ILogger logger)
     {
         this.Logger = logger;
         this.Config = config;
         this.PromptTemplateEngine = promptTemplateEngine;
-        this._memory = memory;
         this._aiServiceProvider = aiServiceProvider;
         this._promptTemplateEngine = promptTemplateEngine;
         this._skillCollection = skillCollection;
@@ -136,12 +133,6 @@ public sealed class Kernel : IKernel, IDisposable
         this._skillCollection.AddFunction(customFunction);
 
         return customFunction;
-    }
-
-    /// <inheritdoc/>
-    public void RegisterMemory(ISemanticTextMemory memory)
-    {
-        this._memory = memory;
     }
 
     /// <inheritdoc/>
@@ -247,16 +238,12 @@ public sealed class Kernel : IKernel, IDisposable
     public void Dispose()
     {
         // ReSharper disable once SuspiciousTypeConversion.Global
-        if (this._memory is IDisposable mem) { mem.Dispose(); }
-
-        // ReSharper disable once SuspiciousTypeConversion.Global
         if (this._skillCollection is IDisposable reg) { reg.Dispose(); }
     }
 
     #region private ================================================================================
 
     private readonly ISkillCollection _skillCollection;
-    private ISemanticTextMemory _memory;
     private readonly IPromptTemplateEngine _promptTemplateEngine;
     private readonly IAIServiceProvider _aiServiceProvider;
 

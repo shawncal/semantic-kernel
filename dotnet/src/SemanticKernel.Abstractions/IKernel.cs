@@ -6,7 +6,6 @@ using System.ComponentModel;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using Microsoft.SemanticKernel.Memory;
 using Microsoft.SemanticKernel.Orchestration;
 using Microsoft.SemanticKernel.SemanticFunctions;
 using Microsoft.SemanticKernel.Services;
@@ -33,7 +32,8 @@ public interface IKernel
     /// <summary>
     /// Semantic memory instance
     /// </summary>
-    ISemanticTextMemory Memory { get; }
+    [Obsolete("Memory no longer stored on Kernel directly. Use TextMemoryPlugin instead. See aka.ms/memory-plugin")]
+    public object? Memory { get; }
 
     /// <summary>
     /// Reference to the engine rendering prompt templates
@@ -82,12 +82,6 @@ public interface IKernel
     /// <param name="skillName">Name of the skill for skill collection and prompt templates. If the value is empty functions are registered in the global namespace.</param>
     /// <returns>A list of all the semantic functions found in the directory, indexed by function name.</returns>
     IDictionary<string, ISKFunction> ImportSkill(object skillInstance, string? skillName = null);
-
-    /// <summary>
-    /// Set the semantic memory to use
-    /// </summary>
-    /// <param name="memory">Semantic memory instance</param>
-    void RegisterMemory(ISemanticTextMemory memory);
 
     /// <summary>
     /// Run a single synchronous or asynchronous <see cref="ISKFunction"/>.

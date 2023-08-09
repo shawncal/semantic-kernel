@@ -10,10 +10,9 @@ using System.Threading.Tasks;
 using Microsoft.SemanticKernel.AI.Embeddings;
 using Microsoft.SemanticKernel.AI.Embeddings.VectorOperations;
 using Microsoft.SemanticKernel.Diagnostics;
-using Microsoft.SemanticKernel.Memory;
 using Microsoft.SemanticKernel.Memory.Collections;
 
-namespace Microsoft.SemanticKernel.Plugins.Memory;
+namespace Microsoft.SemanticKernel.Memory;
 
 /// <summary>
 /// A simple volatile memory embeddings store.

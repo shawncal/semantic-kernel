@@ -9,10 +9,9 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.SemanticKernel.Diagnostics;
-using Microsoft.SemanticKernel.Memory;
 using Microsoft.SemanticKernel.SkillDefinition;
 
-namespace Microsoft.SemanticKernel.Plugins.Memory;
+namespace Microsoft.SemanticKernel.Memory;
 
 /// <summary>
 /// TextMemorySkill provides a skill to save or recall information from the long or short term memory.
