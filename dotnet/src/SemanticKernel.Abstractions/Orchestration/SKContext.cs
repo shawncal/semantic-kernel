@@ -172,7 +172,7 @@ public sealed class SKContext
     /// </summary>
     [Obsolete("Memory no longer passed through SKContext. Instead, initialize your skill class with the memory provider it needs.")]
     [EditorBrowsable(EditorBrowsableState.Never)]
-    public ISemanticTextMemory Memory
+    public object Memory
     {
         get => throw new InvalidOperationException(
             "Memory no longer passed through SKContext. Instead, initialize your skill class with the memory provider it needs.");

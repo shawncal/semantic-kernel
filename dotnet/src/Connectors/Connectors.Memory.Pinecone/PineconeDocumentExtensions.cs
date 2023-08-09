@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Text.Json;
 using Microsoft.SemanticKernel.AI.Embeddings;
+using Microsoft.SemanticKernel.Memory;
 
 namespace Microsoft.SemanticKernel.Connectors.Memory.Pinecone;
 

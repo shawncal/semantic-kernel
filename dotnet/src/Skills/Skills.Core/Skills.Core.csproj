@@ -17,6 +17,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\Plugins\Plugins.Memory\Plugins.Memory.csproj" />
     <ProjectReference Include="..\..\SemanticKernel\SemanticKernel.csproj" />
   </ItemGroup>
 
