@@ -218,5 +218,10 @@ public sealed class SKContext
     {
         return this.Skills.GetFunction(skillName, functionName);
     }
+
+    internal void CreateResult(IAsyncEnumerable<string> resultStream)
+    {
+        throw new NotImplementedException();
+    }
     #endregion
 }

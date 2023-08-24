@@ -191,7 +191,7 @@ public class CalendarSkillTests
 
         // Assert
         Assert.True(context.ErrorOccurred);
-        Assert.IsType<SKException>(context.LastException);
+        Assert.IsType<SKException>(context.Exception);
     }
 
     [Fact]
@@ -218,7 +218,7 @@ public class CalendarSkillTests
 
         // Assert
         Assert.True(context.ErrorOccurred);
-        Assert.IsType<SKException>(context.LastException);
+        Assert.IsType<SKException>(context.Exception);
     }
 
     [Fact]
@@ -245,7 +245,7 @@ public class CalendarSkillTests
 
         // Assert
         Assert.True(context.ErrorOccurred);
-        ArgumentException e = Assert.IsType<ArgumentException>(context.LastException);
+        ArgumentException e = Assert.IsType<ArgumentException>(context.Exception);
         Assert.Equal("subject", e.ParamName);
     }
 }

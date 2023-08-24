@@ -120,7 +120,7 @@ public static class InlineFunctionsDefinitionExtension
     /// <param name="frequencyPenalty">Frequency Penalty parameter passed to LLM</param>
     /// <param name="stopSequences">Strings the LLM will detect to stop generating (before reaching max tokens)</param>
     /// <returns>A function ready to use</returns>
-    public static Task<SKContext> InvokeSemanticFunctionAsync(
+    public static Task<KernelResult> InvokeSemanticFunctionAsync(
         this IKernel kernel,
         string promptTemplate,
         string? functionName = null,

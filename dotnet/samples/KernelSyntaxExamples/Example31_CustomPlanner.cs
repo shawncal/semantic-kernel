@@ -27,7 +27,7 @@ internal static class Example31_CustomPlanner
 
         // ContextQuery is part of the QASkill
         IDictionary<string, ISKFunction> skills = LoadQASkill(kernel);
-        SKContext context = CreateContextQueryContext(kernel);
+        ContextVariables args = CreateContextQueryArgs();
 
         // Create a memory store using the VolatileMemoryStore and the embedding generator registered in the kernel
         kernel.ImportSkill(new TextMemorySkill(kernel.Memory));
@@ -44,8 +44,8 @@ internal static class Example31_CustomPlanner
         plan.AddSteps(skills["ContextQuery"], markup["RunMarkup"]);
 
         // Execute plan
-        context.Variables.Update("Who is my president? Who was president 3 years ago? What should I eat for dinner");
-        var result = await plan.InvokeAsync(context);
+        args["input"] = "Who is my president? Who was president 3 years ago? What should I eat for dinner";
+        var result = await kernel.RunAsync(plan, args);
 
         Console.WriteLine("Result:");
         Console.WriteLine(result.Result);
@@ -71,18 +71,18 @@ internal static class Example31_CustomPlanner
     For dinner, you might enjoy some sushi with your partner, since you both like it and you only ate it once this month
     */
 
-    private static SKContext CreateContextQueryContext(IKernel kernel)
+    private static ContextVariables CreateContextQueryArgs()
     {
-        var context = kernel.CreateNewContext();
-        context.Variables.Set("firstname", "Jamal");
-        context.Variables.Set("lastname", "Williams");
-        context.Variables.Set("city", "Tacoma");
-        context.Variables.Set("state", "WA");
-        context.Variables.Set("country", "USA");
-        context.Variables.Set("collection", "contextQueryMemories");
-        context.Variables.Set("limit", "5");
-        context.Variables.Set("relevance", "0.3");
-        return context;
+        var args = new ContextVariables();
+        args.Set("firstname", "Jamal");
+        args.Set("lastname", "Williams");
+        args.Set("city", "Tacoma");
+        args.Set("state", "WA");
+        args.Set("country", "USA");
+        args.Set("collection", "contextQueryMemories");
+        args.Set("limit", "5");
+        args.Set("relevance", "0.3");
+        return args;
     }
 
     private static async Task RememberFactsAsync(IKernel kernel)
@@ -145,16 +145,16 @@ internal static class Example31_CustomPlanner
 public class MarkupSkill
 {
     [SKFunction, Description("Run Markup")]
-    public async Task<string> RunMarkupAsync(string docString, SKContext context)
+    public async Task<string> RunMarkupAsync(string docString, ContextVariables args, IKernel kernel)
     {
-        var plan = docString.FromMarkup("Run a piece of xml markup", context);
+        var plan = docString.FromMarkup("Run a piece of xml markup", kernel);
 
         Console.WriteLine("Markup plan:");
         Console.WriteLine(plan.ToPlanWithGoalString());
         Console.WriteLine();
 
-        var result = await plan.InvokeAsync();
-        return result.Result;
+        var result = await kernel.RunAsync(plan, args);
+        return result.Result ?? string.Empty;
     }
 }
 
@@ -165,7 +165,7 @@ public static class XmlMarkupPlanParser
         { "lookup", new KeyValuePair<string, string>("bing", "SearchAsync") },
     };
 
-    public static Plan FromMarkup(this string markup, string goal, SKContext context)
+    public static Plan FromMarkup(this string markup, string goal, IKernel kernel)
     {
         Console.WriteLine("Markup:");
         Console.WriteLine(markup);
@@ -173,10 +173,10 @@ public static class XmlMarkupPlanParser
 
         var doc = new XmlMarkup(markup);
         var nodes = doc.SelectElements();
-        return nodes.Count == 0 ? new Plan(goal) : NodeListToPlan(nodes, context, goal);
+        return nodes.Count == 0 ? new Plan(goal) : NodeListToPlan(nodes, kernel, goal);
     }
 
-    private static Plan NodeListToPlan(XmlNodeList nodes, SKContext context, string description)
+    private static Plan NodeListToPlan(XmlNodeList nodes, IKernel kernel, string description)
     {
         Plan plan = new(description);
         for (var i = 0; i < nodes.Count; ++i)
@@ -195,13 +195,13 @@ public static class XmlMarkupPlanParser
 
             if (hasChildElements)
             {
-                plan.AddSteps(NodeListToPlan(node.ChildNodes, context, functionName));
+                plan.AddSteps(NodeListToPlan(node.ChildNodes, kernel, functionName));
             }
             else
             {
                 if (string.IsNullOrEmpty(skillName)
-                        ? !context.Skills!.TryGetFunction(functionName, out var _)
-                        : !context.Skills!.TryGetFunction(skillName, functionName, out var _))
+                        ? !kernel.Skills!.TryGetFunction(functionName, out var _)
+                        : !kernel.Skills!.TryGetFunction(skillName, functionName, out var _))
                 {
                     var planStep = new Plan(node.InnerText);
                     planStep.Parameters.Update(node.InnerText);
@@ -212,8 +212,8 @@ public static class XmlMarkupPlanParser
                 else
                 {
                     var command = string.IsNullOrEmpty(skillName)
-                        ? context.Skills.GetFunction(functionName)
-                        : context.Skills.GetFunction(skillName, functionName);
+                        ? kernel.Skills.GetFunction(functionName)
+                        : kernel.Skills.GetFunction(skillName, functionName);
                     var planStep = new Plan(command);
                     planStep.Parameters.Update(node.InnerText);
                     planStep.Outputs.Add($"markup.{functionName}.result");

@@ -159,7 +159,7 @@ internal sealed class NativeFunction : ISKFunction, IDisposable
     }
 
     /// <inheritdoc/>
-    public async Task<SKContext> InvokeAsync(
+    public async Task<FunctionResult> InvokeAsync(
         SKContext context,
         CompleteRequestSettings? settings = null,
         CancellationToken cancellationToken = default)
@@ -290,7 +290,7 @@ internal sealed class NativeFunction : ISKFunction, IDisposable
             functionName = SanitizeMetadataName(method.Name!);
             Verify.ValidFunctionName(functionName);
 
-            if (IsAsyncMethod(method) &&
+            if ((IsAsyncMethod(method) || IsAsyncEnumerableMethod(method)) &&
                 functionName.EndsWith("Async", StringComparison.Ordinal) &&
                 functionName.Length > "Async".Length)
             {
@@ -313,6 +313,19 @@ internal sealed class NativeFunction : ISKFunction, IDisposable
         logger?.LogTrace("Method '{0}' found", result.Name);
 
         return result;
+    }
+
+    private static bool IsAsyncEnumerableMethod(MethodInfo method)
+    {
+        Type t = method.ReturnType;
+
+        if (t.IsGenericType)
+        {
+            t = t.GetGenericTypeDefinition();
+            return typeof(IAsyncEnumerable<>).IsAssignableFrom(t);
+        }
+
+        return false;
     }
 
     /// <summary>Gets whether a method has a known async return type.</summary>
@@ -609,6 +622,15 @@ internal sealed class NativeFunction : ISKFunction, IDisposable
             {
                 context.Variables.Update(await ((ValueTask<string>)ThrowIfNullResult(result)).ConfigureAwait(false));
                 return context;
+            };
+        }
+
+        if (typeof(IAsyncEnumerable<string>).IsAssignableFrom(returnType))
+        {
+            return static (result, context) =>
+            {
+                context.CreateResult((IAsyncEnumerable<string>)ThrowIfNullResult(result));
+                return Task.FromResult(context);
             };
         }
 

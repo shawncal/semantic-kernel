@@ -42,10 +42,10 @@ public class MathSkillTests
         var target = new MathSkill();
 
         // Act
-        var context = await FunctionHelpers.CallViaKernel(target, "Add", ("input", initialValue), ("amount", amount));
+        var result = await FunctionHelpers.CallViaKernel(target, "Add", ("input", initialValue), ("amount", amount));
 
         // Assert
-        Assert.Equal(expectedResult, context.Variables.Input);
+        Assert.Equal(expectedResult, result.Result);
     }
 
     [Theory]
@@ -63,10 +63,10 @@ public class MathSkillTests
         var target = new MathSkill();
 
         // Act
-        var context = await FunctionHelpers.CallViaKernel(target, "Subtract", ("input", initialValue), ("amount", amount));    // Assert
+        var result = await FunctionHelpers.CallViaKernel(target, "Subtract", ("input", initialValue), ("amount", amount));    // Assert
 
         // Assert
-        Assert.Equal(expectedResult, context.Variables.Input);
+        Assert.Equal(expectedResult, result.Result);
     }
 
     [Theory]
@@ -87,10 +87,10 @@ public class MathSkillTests
         var target = new MathSkill();
 
         // Act
-        var context = await FunctionHelpers.CallViaKernel(target, "Add", ("input", initialValue), ("amount", "1"));
+        var result = await FunctionHelpers.CallViaKernel(target, "Add", ("input", initialValue), ("amount", "1"));
 
         // Assert
-        AssertExtensions.AssertIsArgumentOutOfRange(context.LastException, "value", initialValue);
+        AssertExtensions.AssertIsArgumentOutOfRange(result.Exception, "value", initialValue);
     }
 
     [Theory]
@@ -114,7 +114,7 @@ public class MathSkillTests
         var context = await FunctionHelpers.CallViaKernel(target, "Add", ("input", "1"), ("amount", amount));
 
         // Assert
-        AssertExtensions.AssertIsArgumentOutOfRange(context.LastException, "amount", amount);
+        AssertExtensions.AssertIsArgumentOutOfRange(context.Exception, "amount", amount);
     }
 
     [Theory]
@@ -135,10 +135,10 @@ public class MathSkillTests
         var target = new MathSkill();
 
         // Act
-        var context = await FunctionHelpers.CallViaKernel(target, "Subtract", ("input", initialValue), ("amount", "1"));
+        var result = await FunctionHelpers.CallViaKernel(target, "Subtract", ("input", initialValue), ("amount", "1"));
 
         // Assert
-        AssertExtensions.AssertIsArgumentOutOfRange(context.LastException, "value", initialValue);
+        AssertExtensions.AssertIsArgumentOutOfRange(result.Exception, "value", initialValue);
     }
 
     [Theory]
@@ -159,9 +159,9 @@ public class MathSkillTests
         var target = new MathSkill();
 
         // Act
-        var context = await FunctionHelpers.CallViaKernel(target, "Subtract", ("input", "1"), ("amount", amount));
+        var result = await FunctionHelpers.CallViaKernel(target, "Subtract", ("input", "1"), ("amount", amount));
 
         // Assert
-        AssertExtensions.AssertIsArgumentOutOfRange(context.LastException, "amount", amount);
+        AssertExtensions.AssertIsArgumentOutOfRange(result.Exception, "amount", amount);
     }
 }

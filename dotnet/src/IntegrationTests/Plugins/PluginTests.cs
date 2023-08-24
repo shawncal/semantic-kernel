@@ -39,7 +39,7 @@ public class PluginTests
         contextVariables["countryCode"] = countryCode;
 
         // Act
-        var result = await skill[functionName].InvokeAsync(new SKContext(contextVariables));
+        var result = await kernel.RunAsync(skill[functionName], contextVariables);
 
         // Assert
         Assert.False(result.ErrorOccurred);
@@ -71,7 +71,7 @@ public class PluginTests
         contextVariables["payload"] = payload;
 
         // Act
-        var result = await skill[functionName].InvokeAsync(new SKContext(contextVariables));
+        var result = await kernel.RunAsync(skill[functionName], contextVariables);
 
         // Assert
         Assert.False(result.ErrorOccurred);
@@ -105,7 +105,7 @@ public class PluginTests
             contextVariables["payload"] = payload;
 
             // Act
-            var result = await skill[functionName].InvokeAsync(new SKContext(contextVariables));
+            var result = await kernel.RunAsync(skill[functionName], contextVariables);
 
             // Assert
             Assert.False(result.ErrorOccurred);
@@ -138,7 +138,7 @@ public class PluginTests
         contextVariables["payload"] = payload;
 
         // Act
-        var result = await skill[functionName].InvokeAsync(new SKContext(contextVariables));
+        var result = await kernel.RunAsync(skill[functionName], contextVariables);
 
         // Assert
         Assert.False(result.ErrorOccurred);

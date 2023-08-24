@@ -53,7 +53,7 @@ public sealed class InstrumentedPlan : IPlan
     }
 
     /// <inheritdoc/>
-    public async Task<SKContext> InvokeAsync(
+    public async Task<FunctionResult> InvokeAsync(
         SKContext context,
         CompleteRequestSettings? settings = null,
         CancellationToken cancellationToken = default)
@@ -121,35 +121,40 @@ public sealed class InstrumentedPlan : IPlan
     /// Wrapper for instrumentation to be used in multiple invocation places.
     /// </summary>
     /// <param name="func">Delegate to instrument.</param>
-    private async Task<SKContext> InvokeWithInstrumentationAsync(Func<Task<SKContext>> func)
+    private async Task<FunctionResult> InvokeWithInstrumentationAsync(Func<Task<FunctionResult>> func)
     {
         this._logger.LogInformation("Plan execution started.");
 
+        FunctionResult? result;
         var stopwatch = new Stopwatch();
 
         stopwatch.Start();
 
-        var result = await func().ConfigureAwait(false);
-
-        stopwatch.Stop();
-
-        if (result.ErrorOccurred)
+        try
         {
-            this._logger.LogWarning("Plan execution status: {Status}", "Failed");
-            this._logger.LogError(result.LastException, "Plan execution exception details: {Message}", result.LastException?.Message);
+            result = await func().ConfigureAwait(false);
+            stopwatch.Stop();
 
-            s_executionFailureCounter.Add(1);
-        }
-        else
-        {
             this._logger.LogInformation("Plan execution status: {Status}", "Success");
             this._logger.LogInformation("Plan execution finished in {ExecutionTime}ms", stopwatch.ElapsedMilliseconds);
 
             s_executionSuccessCounter.Add(1);
         }
+        catch (Exception ex)
+        {
+            this._logger.LogWarning("Plan execution status: {Status}", "Failed");
+            this._logger.LogError(ex, "Plan execution exception details: {Message}", ex.Message);
 
-        s_executionTotalCounter.Add(1);
-        s_executionTimeHistogram.Record(stopwatch.ElapsedMilliseconds);
+            s_executionFailureCounter.Add(1);
+
+            throw;
+        }
+        finally
+        {
+            stopwatch.Stop();
+            s_executionTotalCounter.Add(1);
+            s_executionTimeHistogram.Record(stopwatch.ElapsedMilliseconds);
+        }
 
         return result;
     }

@@ -3,6 +3,7 @@
 using System;
 using System.Threading.Tasks;
 using Microsoft.SemanticKernel;
+using Microsoft.SemanticKernel.Orchestration;
 using Microsoft.SemanticKernel.Planning;
 using Microsoft.SemanticKernel.Skills.Core;
 using RepoUtils;
@@ -83,27 +84,26 @@ his daughter, Mary. Mary procured work to eek out a living, but after ten months
 her a beggar. My father came to her aid and two years later they married.
 ";
 
-        var context = kernel.CreateNewContext();
-        context.Variables.Update(summaryText);
-        context.Variables.Set("topic", "people and places");
-        context.Variables.Set("example_entities", "John, Jane, mother, brother, Paris, Rome");
-
-        var extractionResult = (await entityExtraction.InvokeAsync(context)).Result;
+        var args = new ContextVariables();
+        args["input"] = summaryText;
+        args["topic"] = "people and places";
+        args["example_entities"] = "John, Jane, mother, brother, Paris, Rome";
+        var extractionResult = await kernel.RunAsync(entityExtraction, args);
 
         Console.WriteLine("======== Extract Entities ========");
-        Console.WriteLine(extractionResult);
+        Console.WriteLine(extractionResult.Result);
 
-        context.Variables.Update(extractionResult);
-        context.Variables.Set("reference_context", s_groundingText);
+        args["input"] = extractionResult.Result!;
+        args["reference_context"] = s_groundingText;
 
-        var groundingResult = (await reference_check.InvokeAsync(context)).Result;
+        var groundingResult = await kernel.RunAsync(reference_check, args);
 
         Console.WriteLine("======== Reference Check ========");
-        Console.WriteLine(groundingResult);
+        Console.WriteLine(groundingResult.Result);
 
-        context.Variables.Update(summaryText);
-        context.Variables.Set("ungrounded_entities", groundingResult);
-        var excisionResult = await entity_excision.InvokeAsync(context);
+        args["input"] = summaryText;
+        args["ungrounded_entities"] = groundingResult.Result!;
+        var excisionResult = await kernel.RunAsync(entity_excision, args);
 
         Console.WriteLine("======== Excise Entities ========");
         Console.WriteLine(excisionResult.Result);
@@ -141,7 +141,9 @@ which are not grounded in the original.
         var plan = await planner.CreatePlanAsync(ask);
         Console.WriteLine(plan.ToPlanWithGoalString());
 
-        var results = await plan.InvokeAsync(s_groundingText);
+        var args = new ContextVariables();
+        args["input"] = s_groundingText;
+        var results = await kernel.RunAsync(plan, args);
         Console.WriteLine(results.Result);
     }
 }

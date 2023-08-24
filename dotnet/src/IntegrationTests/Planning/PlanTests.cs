@@ -114,7 +114,7 @@ public sealed class PlanTests : IDisposable
 
         // Assert
         Assert.Contains(expectedBody, result.Result, StringComparison.OrdinalIgnoreCase);
-        Assert.True(expectedBody.Length < result.Result.Length);
+        Assert.True(expectedBody.Length < result.Result?.Length);
     }
 
     [Fact]
@@ -371,7 +371,7 @@ public sealed class PlanTests : IDisposable
 
         // Assert
         Assert.Contains(expectedBody, result.Result, StringComparison.OrdinalIgnoreCase);
-        Assert.True(expectedBody.Length < result.Result.Length);
+        Assert.True(expectedBody.Length < result.Result?.Length);
     }
 
     [Theory]
@@ -432,7 +432,7 @@ public sealed class PlanTests : IDisposable
 
         // Assert
         Assert.Contains(expectedBody, result.Result, StringComparison.OrdinalIgnoreCase);
-        Assert.True(expectedBody.Length < result.Result.Length);
+        Assert.True(expectedBody.Length < result.Result?.Length);
     }
 
     [Theory]

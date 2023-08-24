@@ -144,7 +144,7 @@ Answer: ";
         });
 
         // If the answer contains commands, execute them using the prompt renderer.
-        if (answer.Result.Contains("bing.search", StringComparison.OrdinalIgnoreCase))
+        if (answer.Result?.Contains("bing.search", StringComparison.OrdinalIgnoreCase) == true)
         {
             var promptRenderer = new PromptTemplateEngine();
 

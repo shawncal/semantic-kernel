@@ -148,74 +148,67 @@ public sealed class Kernel : IKernel, IDisposable
     }
 
     /// <inheritdoc/>
-    public Task<SKContext> RunAsync(ISKFunction skFunction,
+    public Task<KernelResult> RunAsync(ISKFunction skFunction,
         ContextVariables? variables = null,
         CancellationToken cancellationToken = default)
         => this.RunAsync(variables ?? new(), cancellationToken, skFunction);
 
     /// <inheritdoc/>
-    public Task<SKContext> RunAsync(params ISKFunction[] pipeline)
+    public Task<KernelResult> RunAsync(params ISKFunction[] pipeline)
         => this.RunAsync(new ContextVariables(), pipeline);
 
     /// <inheritdoc/>
-    public Task<SKContext> RunAsync(string input, params ISKFunction[] pipeline)
+    public Task<KernelResult> RunAsync(string input, params ISKFunction[] pipeline)
         => this.RunAsync(new ContextVariables(input), pipeline);
 
     /// <inheritdoc/>
-    public Task<SKContext> RunAsync(ContextVariables variables, params ISKFunction[] pipeline)
+    public Task<KernelResult> RunAsync(ContextVariables variables, params ISKFunction[] pipeline)
         => this.RunAsync(variables, CancellationToken.None, pipeline);
 
     /// <inheritdoc/>
-    public Task<SKContext> RunAsync(CancellationToken cancellationToken, params ISKFunction[] pipeline)
+    public Task<KernelResult> RunAsync(CancellationToken cancellationToken, params ISKFunction[] pipeline)
         => this.RunAsync(new ContextVariables(), cancellationToken, pipeline);
 
     /// <inheritdoc/>
-    public Task<SKContext> RunAsync(string input, CancellationToken cancellationToken, params ISKFunction[] pipeline)
+    public Task<KernelResult> RunAsync(string input, CancellationToken cancellationToken, params ISKFunction[] pipeline)
         => this.RunAsync(new ContextVariables(input), cancellationToken, pipeline);
 
     /// <inheritdoc/>
-    public async Task<SKContext> RunAsync(ContextVariables variables, CancellationToken cancellationToken, params ISKFunction[] pipeline)
+    public async Task<KernelResult> RunAsync(ContextVariables variables, CancellationToken cancellationToken, params ISKFunction[] pipeline)
     {
-        var context = new SKContext(
-            variables,
-            this._skillCollection,
-            this.LoggerFactory);
-
-        int pipelineStepCount = -1;
+        int pipelineStepCount = 0;
+        FunctionResult? stepResult = null;
         foreach (ISKFunction f in pipeline)
         {
-            if (context.ErrorOccurred)
-            {
-                this._logger.LogError(
-                    context.LastException,
-                    "Something went wrong in pipeline step {0}:'{1}'", pipelineStepCount, context.LastException?.Message);
-                return context;
-            }
-
-            pipelineStepCount++;
-
             try
             {
-                cancellationToken.ThrowIfCancellationRequested();
-                context = await f.InvokeAsync(context, cancellationToken: cancellationToken).ConfigureAwait(false);
+                var context = new SKContext(
+                    variables,
+                    this._skillCollection,
+                    this.LoggerFactory);
 
-                if (context.ErrorOccurred)
+                cancellationToken.ThrowIfCancellationRequested();
+                stepResult = await f.InvokeAsync(context, cancellationToken: cancellationToken).ConfigureAwait(false);
+
+                await foreach (string s in stepResult.ContentStream.WithCancellation(cancellationToken))
                 {
-                    this._logger.LogError("Function call fail during pipeline step {0}: {1}.{2}. Error: {3}",
-                        pipelineStepCount, f.SkillName, f.Name, context.LastException?.Message);
-                    return context;
+                    // TODO: trigger FunctionResultData event
                 }
+
+                // Update variables with the output of the previous function
+                variables["input"] = await stepResult.ReadContentAsync().ConfigureAwait(false);
             }
             catch (Exception e) when (!e.IsCriticalException())
             {
                 this._logger.LogError(e, "Something went wrong in pipeline step {0}: {1}.{2}. Error: {3}",
                     pipelineStepCount, f.SkillName, f.Name, e.Message);
-                context.LastException = e;
-                return context;
+                return new KernelResult(e);
             }
+
+            pipelineStepCount++;
         }
 
-        return context;
+        return new KernelResult(await stepResult!.ReadContentAsync().ConfigureAwait(false));
     }
 
     /// <inheritdoc/>

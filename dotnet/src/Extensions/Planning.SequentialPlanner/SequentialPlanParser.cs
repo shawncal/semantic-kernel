@@ -41,18 +41,18 @@ internal static class SequentialPlanParser
     /// </summary>
     internal const string AppendToResultTag = "appendToResult";
 
-    internal static Func<string, string, ISKFunction?> GetSkillFunction(SKContext context)
+    internal static Func<string, string, ISKFunction?> GetSkillFunction(IKernel kernel)
     {
         return (skillName, functionName) =>
         {
             if (string.IsNullOrEmpty(skillName))
             {
-                if (context.Skills!.TryGetFunction(functionName, out var skillFunction))
+                if (kernel.Skills!.TryGetFunction(functionName, out var skillFunction))
                 {
                     return skillFunction;
                 }
             }
-            else if (context.Skills!.TryGetFunction(skillName, functionName, out var skillFunction))
+            else if (kernel.Skills!.TryGetFunction(skillName, functionName, out var skillFunction))
             {
                 return skillFunction;
             }

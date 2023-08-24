@@ -14,7 +14,7 @@ internal static class FunctionHelpers
     /// <summary>
     /// Invokes a function on a skill instance via the kernel.
     /// </summary>
-    public static Task<SKContext> CallViaKernel(
+    public static Task<KernelResult> CallViaKernel(
         object skillInstance,
         string methodName,
         params (string Name, string Value)[] variables)
@@ -23,12 +23,12 @@ internal static class FunctionHelpers
 
         IDictionary<string, ISKFunction> funcs = kernel.ImportSkill(skillInstance);
 
-        SKContext context = kernel.CreateNewContext();
+        ContextVariables args = new();
         foreach ((string Name, string Value) pair in variables)
         {
-            context.Variables.Set(pair.Name, pair.Value);
+            args.Set(pair.Name, pair.Value);
         }
 
-        return funcs[methodName].InvokeAsync(context);
+        return kernel.RunAsync(funcs[methodName], args);
     }
 }

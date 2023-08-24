@@ -2,7 +2,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Azure;
 using Microsoft.SemanticKernel;
@@ -31,18 +30,18 @@ public static class Example43_GetModelResult
 
         var myFunction = kernel.CreateSemanticFunction(FunctionDefinition);
 
-        // Using InvokeAsync with 3 results (Currently invoke only supports 1 result, but you can get the other results from the ModelResults)
-        var textResult = await myFunction.InvokeAsync("Sci-fi",
-            settings: new CompleteRequestSettings { ResultsPerPrompt = 3, MaxTokens = 500, Temperature = 1, TopP = 0.5 });
-        Console.WriteLine(textResult);
-        Console.WriteLine(textResult.ModelResults.Select(result => result.GetOpenAITextResult()).AsJson());
-        Console.WriteLine();
+        //// Using InvokeAsync with 3 results (Currently invoke only supports 1 result, but you can get the other results from the ModelResults)
+        //var textResult = await myFunction.InvokeAsync("Sci-fi",
+        //    settings: new CompleteRequestSettings { ResultsPerPrompt = 3, MaxTokens = 500, Temperature = 1, TopP = 0.5 });
+        //Console.WriteLine(textResult);
+        //Console.WriteLine(textResult.ModelResults.Select(result => result.GetOpenAITextResult()).AsJson());
+        //Console.WriteLine();
 
-        // Using the Kernel RunAsync
-        textResult = await kernel.RunAsync("sorry I forgot your birthday", myFunction);
-        Console.WriteLine(textResult);
-        Console.WriteLine(textResult.ModelResults.LastOrDefault()?.GetOpenAITextResult()?.Usage.AsJson());
-        Console.WriteLine();
+        //// Using the Kernel RunAsync
+        //textResult = await kernel.RunAsync("sorry I forgot your birthday", myFunction);
+        //Console.WriteLine(textResult);
+        //Console.WriteLine(textResult.ModelResults.LastOrDefault()?.GetOpenAITextResult()?.Usage.AsJson());
+        //Console.WriteLine();
 
         // Using Chat Completion directly
         var chatCompletion = new OpenAIChatCompletion(
@@ -65,7 +64,7 @@ public static class Example43_GetModelResult
 
         if (failedContext.ErrorOccurred)
         {
-            Console.WriteLine(OutputExceptionDetail(failedContext.LastException?.InnerException));
+            Console.WriteLine(OutputExceptionDetail(failedContext.Exception?.InnerException));
         }
 
         string OutputExceptionDetail(Exception? exception)

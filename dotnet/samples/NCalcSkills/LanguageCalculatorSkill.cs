@@ -26,6 +26,7 @@ namespace NCalcSkills;
 public class LanguageCalculatorSkill
 {
     private readonly ISKFunction _mathTranslator;
+    private readonly IKernel _kernel;
 
     private const string MathTranslatorPrompt =
         @"Translate a math problem into a expression that can be executed using .net NCalc library. Use the output of running this code to answer the question.
@@ -63,6 +64,7 @@ Question: {{ $input }}
 
     public LanguageCalculatorSkill(IKernel kernel)
     {
+        this._kernel = kernel;
         this._mathTranslator = kernel.CreateSemanticFunction(
             MathTranslatorPrompt,
             skillName: nameof(LanguageCalculatorSkill),
@@ -79,11 +81,13 @@ Question: {{ $input }}
         string input,
         SKContext context)
     {
-        var answer = await this._mathTranslator.InvokeAsync(input).ConfigureAwait(false);
+        var args = new ContextVariables();
+        args["input"] = input;
+        var answer = await this._kernel.RunAsync(this._mathTranslator, args).ConfigureAwait(false);
 
         if (answer.ErrorOccurred)
         {
-            throw new InvalidOperationException("error in calculator for input " + input + " " + answer.LastException?.Message);
+            throw new InvalidOperationException("error in calculator for input " + input + " " + answer.Exception?.Message);
         }
 
         string pattern = @"```\s*(.*?)\s*```";

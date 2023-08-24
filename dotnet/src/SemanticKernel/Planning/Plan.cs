@@ -253,12 +253,8 @@ public sealed class Plan : IPlan
             // Execute the step
             var functionContext = new SKContext(functionVariables, context.Skills, context.LoggerFactory);
             var result = await step.InvokeAsync(functionContext, cancellationToken: cancellationToken).ConfigureAwait(false);
-            var resultValue = result.Result.Trim();
-
-            if (result.ErrorOccurred)
-            {
-                throw new SKException($"Error occurred while running plan step: {result.LastException?.Message}", result.LastException);
-            }
+            var resultValue = await result.ReadContentAsync(cancellationToken).ConfigureAwait(false);
+            resultValue = resultValue?.Trim();
 
             #region Update State
 
@@ -273,17 +269,17 @@ public sealed class Plan : IPlan
             }
 
             // Update state with outputs (if any)
-            foreach (var item in step.Outputs)
-            {
-                if (result.Variables.TryGetValue(item, out string? val))
-                {
-                    this.State.Set(item, val);
-                }
-                else
-                {
-                    this.State.Set(item, resultValue);
-                }
-            }
+            //foreach (var item in step.Outputs)
+            //{
+            //    if (result.Variables.TryGetValue(item, out string? val))
+            //    {
+            //        this.State.Set(item, val);
+            //    }
+            //    else
+            //    {
+            //        this.State.Set(item, resultValue);
+            //    }
+            //}
 
             #endregion Update State
 
@@ -302,7 +298,7 @@ public sealed class Plan : IPlan
     }
 
     /// <inheritdoc/>
-    public async Task<SKContext> InvokeAsync(
+    public async Task<FunctionResult> InvokeAsync(
         SKContext context,
         CompleteRequestSettings? settings = null,
         CancellationToken cancellationToken = default)
@@ -315,12 +311,9 @@ public sealed class Plan : IPlan
                 .InvokeAsync(context, settings, cancellationToken)
                 .ConfigureAwait(false);
 
-            if (result.ErrorOccurred)
-            {
-                return result;
-            }
+            var resultContent = await result.ReadContentAsync(cancellationToken).ConfigureAwait(false);
 
-            context.Variables.Update(result.Result);
+            context.Variables.Update(resultContent);
         }
         else
         {

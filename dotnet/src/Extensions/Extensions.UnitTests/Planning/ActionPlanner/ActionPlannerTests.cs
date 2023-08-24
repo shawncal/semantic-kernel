@@ -39,7 +39,8 @@ public sealed class ActionPlannerTests
                 .Returns<SKContext, CompleteRequestSettings, CancellationToken>((context, settings, CancellationToken) =>
                 {
                     context.Variables.Update("MOCK FUNCTION CALLED");
-                    return Task.FromResult(context);
+
+                    return Task.FromResult((FunctionResult)context);
                 });
 
             skills.Setup(x => x.GetFunction(It.Is<string>(s => s == skillName), It.Is<string>(s => s == name)))

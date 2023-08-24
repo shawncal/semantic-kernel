@@ -74,6 +74,6 @@ public class WaitSkillTests
         var context = await FunctionHelpers.CallViaKernel(target, "Seconds", ("input", textSeconds));
 
         // Assert
-        AssertExtensions.AssertIsArgumentOutOfRange(context.LastException, "seconds", textSeconds);
+        AssertExtensions.AssertIsArgumentOutOfRange(context.Exception, "seconds", textSeconds);
     }
 }

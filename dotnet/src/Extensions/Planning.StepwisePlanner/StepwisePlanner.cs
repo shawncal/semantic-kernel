@@ -64,7 +64,6 @@ public class StepwisePlanner : IStepwisePlanner
         this._systemStepFunction = this.ImportSemanticFunction(this._kernel, "StepwiseStep", promptTemplate, promptConfig);
         this._nativeFunctions = this._kernel.ImportSkill(this, RestrictedSkillName);
 
-        this._context = this._kernel.CreateNewContext();
         this._logger = this._kernel.LoggerFactory.CreateLogger(nameof(StepwisePlanner));
     }
 
@@ -109,16 +108,17 @@ public class StepwisePlanner : IStepwisePlanner
             {
                 var scratchPad = this.CreateScratchPad(question, stepsTaken);
 
+                var args = new ContextVariables();
                 context.Variables.Set("agentScratchPad", scratchPad);
 
-                var llmResponse = (await this._systemStepFunction.InvokeAsync(context).ConfigureAwait(false));
+                var llmResponse = await this._kernel.RunAsync(this._systemStepFunction, context.Variables).ConfigureAwait(false);
 
-                if (llmResponse.ErrorOccurred)
+                if (llmResponse.Exception != null)
                 {
-                    throw new SKException($"Error occurred while executing stepwise plan: {llmResponse.LastException?.Message}", llmResponse.LastException);
+                    throw new SKException($"Error occurred while executing stepwise plan: {llmResponse.Exception?.Message}", llmResponse.Exception);
                 }
 
-                string actionText = llmResponse.Result.Trim();
+                string actionText = llmResponse.Result?.Trim() ?? string.Empty;
                 this._logger?.LogTrace("Response: {ActionText}", actionText);
 
                 var nextStep = this.ParseResult(actionText);
@@ -345,17 +345,17 @@ public class StepwisePlanner : IStepwisePlanner
             var function = this._kernel.Func(targetFunction.SkillName, targetFunction.Name);
             var actionContext = this.CreateActionContext(actionVariables);
 
-            var result = await function.InvokeAsync(actionContext).ConfigureAwait(false);
+            var result = await this._kernel.RunAsync(function, actionContext.Variables).ConfigureAwait(false);
 
-            if (result.ErrorOccurred)
+            if (result.Exception != null)
             {
-                this._logger?.LogError("Error occurred: {Error}", result.LastException);
-                return $"Error occurred: {result.LastException}";
+                this._logger?.LogError("Error occurred: {Error}", result.Exception);
+                return $"Error occurred: {result.Exception}";
             }
 
             this._logger?.LogTrace("Invoked {FunctionName}. Result: {Result}", targetFunction.Name, result.Result);
 
-            return result.Result;
+            return result.Result ?? string.Empty;
         }
         catch (Exception e) when (!e.IsCriticalException())
         {
@@ -380,7 +380,7 @@ public class StepwisePlanner : IStepwisePlanner
 
     private IEnumerable<FunctionView> GetAvailableFunctions()
     {
-        FunctionsView functionsView = this._context.Skills!.GetFunctionsView();
+        FunctionsView functionsView = this._kernel.Skills!.GetFunctionsView();
 
         var excludedSkills = this.Config.ExcludedSkills ?? new();
         var excludedFunctions = this.Config.ExcludedFunctions ?? new();
@@ -439,8 +439,6 @@ public class StepwisePlanner : IStepwisePlanner
     /// </summary>
     private StepwisePlannerConfig Config { get; }
 
-    // Context used to access the list of functions in the kernel
-    private readonly SKContext _context;
     private readonly IKernel _kernel;
     private readonly ILogger _logger;
 

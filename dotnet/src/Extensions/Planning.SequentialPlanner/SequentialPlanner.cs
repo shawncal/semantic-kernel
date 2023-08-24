@@ -35,6 +35,8 @@ public sealed class SequentialPlanner : ISequentialPlanner
 
         this.Config.ExcludedSkills.Add(RestrictedSkillName);
 
+        this._kernel = kernel;
+
         string promptTemplate = prompt ?? EmbeddedResource.Read("skprompt.txt");
 
         this._functionFlowFunction = kernel.CreateSemanticFunction(
@@ -45,8 +47,6 @@ public sealed class SequentialPlanner : ISequentialPlanner
             maxTokens: this.Config.MaxTokens ?? 1024,
             temperature: 0.0,
             stopSequences: new[] { StopSequence });
-
-        this._context = kernel.CreateNewContext();
     }
 
     /// <inheritdoc />
@@ -57,22 +57,26 @@ public sealed class SequentialPlanner : ISequentialPlanner
             throw new SKException("The goal specified is empty");
         }
 
-        string relevantFunctionsManual = await this._context.GetFunctionsManualAsync(goal, this.Config, cancellationToken).ConfigureAwait(false);
-        this._context.Variables.Set("available_functions", relevantFunctionsManual);
+#pragma warning disable CA2016 // Forward the 'CancellationToken' parameter to methods
+        string relevantFunctionsManual = await this._kernel.CreateNewContext()
+            .GetFunctionsManualAsync(goal, this.Config, cancellationToken).ConfigureAwait(false);
+#pragma warning restore CA2016 // Forward the 'CancellationToken' parameter to methods
 
-        this._context.Variables.Update(goal);
+        var args = new ContextVariables();
+        args["available_functions"] = relevantFunctionsManual;
+        args["input"] = goal;
 
-        var planResult = await this._functionFlowFunction.InvokeAsync(this._context, cancellationToken: cancellationToken).ConfigureAwait(false);
+        var planResult = await this._kernel.RunAsync(this._functionFlowFunction, args, cancellationToken: cancellationToken).ConfigureAwait(false);
 
         if (planResult.ErrorOccurred)
         {
-            throw new SKException($"Error creating plan for goal: {planResult.LastException?.Message}", planResult.LastException);
+            throw new SKException($"Error creating plan for goal: {planResult.Exception?.Message}", planResult.Exception);
         }
 
-        string planResultString = planResult.Result.Trim();
+        string planResultString = planResult.Result?.Trim()!;
 
-        var getSkillFunction = this.Config.GetSkillFunction ?? SequentialPlanParser.GetSkillFunction(this._context);
-        var plan = planResultString.ToPlanFromXml(goal, getSkillFunction, this.Config.AllowMissingFunctions);
+        var getSkillFunction = this.Config.GetSkillFunction ?? SequentialPlanParser.GetSkillFunction(this._kernel);
+        Plan plan = planResultString.ToPlanFromXml(goal, getSkillFunction, this.Config.AllowMissingFunctions);
 
         if (plan.Steps.Count == 0)
         {
@@ -84,7 +88,7 @@ public sealed class SequentialPlanner : ISequentialPlanner
 
     private SequentialPlannerConfig Config { get; }
 
-    private readonly SKContext _context;
+    private readonly IKernel _kernel;
 
     /// <summary>
     /// the function flow semantic function, which takes a goal and creates an xml plan that can be executed

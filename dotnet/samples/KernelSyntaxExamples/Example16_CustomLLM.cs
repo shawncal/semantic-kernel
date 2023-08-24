@@ -3,7 +3,6 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
-using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.SemanticKernel;
@@ -113,11 +112,11 @@ public static class Example16_CustomLLM
         var result = await textValidationFunction.InvokeAsync("I mised the training session this morning");
         Console.WriteLine(result);
 
-        // Details of the my custom model response
-        Console.WriteLine(JsonSerializer.Serialize(
-            result.ModelResults,
-            new JsonSerializerOptions() { WriteIndented = true }
-        ));
+        //// Details of the my custom model response
+        //Console.WriteLine(JsonSerializer.Serialize(
+        //    result.ModelResults,
+        //    new JsonSerializerOptions() { WriteIndented = true }
+        //));
     }
 
     private static async Task CustomTextCompletionAsync()

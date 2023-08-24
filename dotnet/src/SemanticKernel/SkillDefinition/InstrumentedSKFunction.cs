@@ -67,7 +67,7 @@ public sealed class InstrumentedSKFunction : ISKFunction
         this._function.Describe();
 
     /// <inheritdoc/>
-    public async Task<SKContext> InvokeAsync(
+    public async Task<FunctionResult> InvokeAsync(
         SKContext context,
         CompleteRequestSettings? settings = null,
         CancellationToken cancellationToken = default)
@@ -127,32 +127,23 @@ public sealed class InstrumentedSKFunction : ISKFunction
     /// Wrapper for instrumentation to be used in multiple invocation places.
     /// </summary>
     /// <param name="func">Delegate to instrument.</param>
-    private async Task<SKContext> InvokeWithInstrumentationAsync(Func<Task<SKContext>> func)
+    private async Task<FunctionResult> InvokeWithInstrumentationAsync(Func<Task<FunctionResult>> func)
     {
         using var activity = s_activitySource.StartActivity($"{this.SkillName}.{this.Name}");
 
         this._logger.LogInformation("{SkillName}.{FunctionName}: Function execution started.", this.SkillName, this.Name);
 
+        FunctionResult? result;
         var stopwatch = new Stopwatch();
 
         stopwatch.Start();
 
-        var result = await func().ConfigureAwait(false);
-
-        stopwatch.Stop();
-
-        if (result.ErrorOccurred)
+        try
         {
-            this._logger.LogWarning("{SkillName}.{FunctionName}: Function execution status: {Status}",
-                this.SkillName, this.Name, "Failed");
+            result = await func().ConfigureAwait(false);
 
-            this._logger.LogError(result.LastException, "{SkillName}.{FunctionName}: Function execution exception details: {Message}",
-                this.SkillName, this.Name, result.LastException?.Message);
+            stopwatch.Stop();
 
-            this._executionFailureCounter.Add(1);
-        }
-        else
-        {
             this._logger.LogInformation("{SkillName}.{FunctionName}: Function execution status: {Status}",
                 this.SkillName, this.Name, "Success");
 
@@ -161,9 +152,24 @@ public sealed class InstrumentedSKFunction : ISKFunction
 
             this._executionSuccessCounter.Add(1);
         }
+        catch (Exception ex)
+        {
+            this._logger.LogWarning("{SkillName}.{FunctionName}: Function execution status: {Status}",
+               this.SkillName, this.Name, "Failed");
 
-        this._executionTotalCounter.Add(1);
-        this._executionTimeHistogram.Record(stopwatch.ElapsedMilliseconds);
+            this._logger.LogError(ex, "{SkillName}.{FunctionName}: Function execution exception details: {Message}",
+                this.SkillName, this.Name, ex.Message);
+
+            this._executionFailureCounter.Add(1);
+
+            throw;
+        }
+        finally
+        {
+            stopwatch.Stop();
+            this._executionTotalCounter.Add(1);
+            this._executionTimeHistogram.Record(stopwatch.ElapsedMilliseconds);
+        }
 
         return result;
     }

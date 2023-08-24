@@ -96,7 +96,10 @@ public sealed class OpenAICompletionTests : IDisposable
         var func = target.CreateSemanticFunction(
             "List the two planets after '{{$input}}', excluding moons, using bullet points.");
 
-        var result = await func.InvokeAsync("Jupiter");
+        var args = new ContextVariables();
+        args["input"] = "Jupiter";
+
+        var result = await target.RunAsync(func, args);
 
         Assert.NotNull(result);
         Assert.False(result.ErrorOccurred);
@@ -224,9 +227,9 @@ public sealed class OpenAICompletionTests : IDisposable
 
         // Assert
         Assert.True(context.ErrorOccurred);
-        Assert.IsType<AIException>(context.LastException);
-        Assert.Equal(AIException.ErrorCodes.AccessDenied, ((AIException)context.LastException).ErrorCode);
-        Assert.Contains("The request is not authorized, HTTP status: 401", ((AIException)context.LastException).Message, StringComparison.OrdinalIgnoreCase);
+        Assert.IsType<AIException>(context.Exception);
+        Assert.Equal(AIException.ErrorCodes.AccessDenied, ((AIException)context.Exception).ErrorCode);
+        Assert.Contains("The request is not authorized, HTTP status: 401", ((AIException)context.Exception).Message, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]
@@ -252,9 +255,9 @@ public sealed class OpenAICompletionTests : IDisposable
 
         // Assert
         Assert.True(context.ErrorOccurred);
-        Assert.IsType<AIException>(context.LastException);
-        Assert.Equal(AIException.ErrorCodes.AccessDenied, ((AIException)context.LastException).ErrorCode);
-        Assert.Contains("The request is not authorized, HTTP status: 401", ((AIException)context.LastException).Message, StringComparison.OrdinalIgnoreCase);
+        Assert.IsType<AIException>(context.Exception);
+        Assert.Equal(AIException.ErrorCodes.AccessDenied, ((AIException)context.Exception).ErrorCode);
+        Assert.Contains("The request is not authorized, HTTP status: 401", ((AIException)context.Exception).Message, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]

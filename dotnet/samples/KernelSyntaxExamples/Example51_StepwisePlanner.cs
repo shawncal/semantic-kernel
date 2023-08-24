@@ -58,17 +58,17 @@ public static class Example51_StepwisePlanner
         sw.Start();
         var plan = planner.CreatePlan(question);
 
-        var result = await plan.InvokeAsync(kernel.CreateNewContext());
+        var result = await kernel.RunAsync(plan);
         Console.WriteLine("Result: " + result);
-        if (result.Variables.TryGetValue("stepCount", out string? stepCount))
-        {
-            Console.WriteLine("Steps Taken: " + stepCount);
-        }
+        //if (result.Variables.TryGetValue("stepCount", out string? stepCount))
+        //{
+        //    Console.WriteLine("Steps Taken: " + stepCount);
+        //}
 
-        if (result.Variables.TryGetValue("skillCount", out string? skillCount))
-        {
-            Console.WriteLine("Skills Used: " + skillCount);
-        }
+        //if (result.Variables.TryGetValue("skillCount", out string? skillCount))
+        //{
+        //    Console.WriteLine("Skills Used: " + skillCount);
+        //}
 
         Console.WriteLine("Time Taken: " + sw.Elapsed);
         Console.WriteLine("*****************************************************");
