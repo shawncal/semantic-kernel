@@ -353,7 +353,8 @@ public class StepwisePlanner : IStepwisePlanner
                 return $"Error occurred: {result.Exception}";
             }
 
-            this._logger?.LogTrace("Invoked {FunctionName}. Result: {Result}", targetFunction.Name, result.Result);
+            string resultString = result.Result?.ToString() ?? string.Empty;
+            this._logger?.LogTrace("Invoked {FunctionName}. Result: {Result}", targetFunction.Name, resultString);
 
             return result.Result ?? string.Empty;
         }

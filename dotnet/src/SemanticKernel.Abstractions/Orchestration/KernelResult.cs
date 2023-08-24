@@ -9,7 +9,7 @@ namespace Microsoft.SemanticKernel.Orchestration;
 /// </summary>
 public sealed class KernelResult
 {
-    public string? Result { get; private set; }
+    public dynamic? Result { get; private set; }
 
     /// <summary>
     /// When an error occurs, this is the most recent exception.
@@ -21,7 +21,7 @@ public sealed class KernelResult
     [Obsolete("Use 'Exception' property instead")]
     public Exception? LastException => this.Exception;
 
-    internal KernelResult(string? result)
+    internal KernelResult(string result)
     {
         this.Result = result;
     }
@@ -33,18 +33,8 @@ public sealed class KernelResult
 
     public static implicit operator SKContext(KernelResult result)
     {
-        var resultValue = result.Result; // TODO: Fix this before checkin
+        string? resultValue = result.Result?.ToString(); // TODO: Fix this before checkin
         var variables = new ContextVariables(resultValue);
         return new SKContext(variables);
     }
-
-    //public static implicit operator KernelResult(SKContext context)
-    //{
-    //    if (context.LastException != null)
-    //    {
-    //        return new KernelResult(context.LastException);
-    //    }
-
-    //    return new KernelResult(context.Result);
-    //}
 }
