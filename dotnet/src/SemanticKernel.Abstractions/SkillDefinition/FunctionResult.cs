@@ -29,6 +29,13 @@ public sealed class FunctionResult
         this.ContentStream = new[] { result }.ToAsyncEnumerable();
     }
 
+    public static implicit operator SKContext(FunctionResult result)
+    {
+        var resultValue = result.AccumulateBufferAsync().Result; // TODO: Fix this before checkin
+        var variables = new ContextVariables(resultValue);
+        return new SKContext(variables);
+    }
+
     public static implicit operator FunctionResult(SKContext context)
     {
         return new FunctionResult(context.Result);

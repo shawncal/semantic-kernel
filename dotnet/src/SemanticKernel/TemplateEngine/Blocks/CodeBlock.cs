@@ -141,23 +141,16 @@ internal sealed class CodeBlock : Block, ICodeRendering
 
         try
         {
-            contextClone = await function.InvokeAsync(contextClone).ConfigureAwait(false);
+            FunctionResult functionResult = await function.InvokeAsync(contextClone).ConfigureAwait(false);
+            return await functionResult.ReadContentAsync().ConfigureAwait(false);
         }
         catch (Exception ex) when (!ex.IsCriticalException())
         {
             this.Logger.LogError(ex, "Something went wrong when invoking function with custom input: {0}.{1}. Error: {2}",
                 function.SkillName, function.Name, ex.Message);
-            contextClone.LastException = ex;
-        }
 
-        if (contextClone.ErrorOccurred)
-        {
-            var errorMsg = $"Function `{fBlock.Content}` execution failed. {contextClone.LastException?.GetType().FullName}: {contextClone.LastException?.Message}";
-            this.Logger.LogError(errorMsg);
-            throw new SKException(errorMsg, contextClone.LastException);
+            throw;
         }
-
-        return contextClone.Result;
     }
 
     private bool GetFunctionFromSkillCollection(
