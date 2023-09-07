@@ -148,10 +148,35 @@ public sealed class Kernel : IKernel, IDisposable
     }
 
     /// <inheritdoc/>
-    public Task<KernelResult> RunAsync(ISKFunction skFunction,
+    public async Task<KernelResult> RunAsync(ISKFunction skFunction,
         ContextVariables? variables = null,
         CancellationToken cancellationToken = default)
-        => this.RunAsync(variables ?? new(), cancellationToken, skFunction);
+    {
+        try
+        {
+            var context = new SKContext(
+                variables,
+                this._skillCollection,
+                this.LoggerFactory);
+
+            cancellationToken.ThrowIfCancellationRequested();
+            FunctionResult? stepResult = await skFunction.InvokeAsync(context, cancellationToken: cancellationToken).ConfigureAwait(false);
+
+            await foreach (string s in stepResult.ContentStream.WithCancellation(cancellationToken))
+            {
+                // TODO: trigger FunctionResultData event with content in 's', for all registered observers.
+            }
+
+            // Update variables with the output of the last function
+            return new KernelResult(await stepResult!.ReadContentAsync(cancellationToken).ConfigureAwait(false));
+        }
+        catch (Exception e) when (!e.IsCriticalException())
+        {
+            this._logger.LogError(e, "Something went wrong in kernel function: {1}.{2}. Error: {3}",
+                skFunction.SkillName, skFunction.Name, e.Message);
+            return new KernelResult(e);
+        }
+    }
 
     /// <inheritdoc/>
     public Task<KernelResult> RunAsync(params ISKFunction[] pipeline)
