@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Reflection;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
@@ -146,6 +147,52 @@ public sealed class Kernel : IKernel, IDisposable
     {
         this._memory = memory;
     }
+
+    // Call pattern ideas with dynamic, generics.
+    // With this approach, the 'KernelResult' class is no longer needed!!!!
+
+    public async Task<dynamic?> RunAsyncDynamic(ISKFunction skFunction,
+        ContextVariables? variables = null,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var context = new SKContext(
+                variables,
+                this._skillCollection,
+                this.LoggerFactory);
+
+            cancellationToken.ThrowIfCancellationRequested();
+            FunctionResult? stepResult = await skFunction.InvokeAsync(context, cancellationToken: cancellationToken).ConfigureAwait(false);
+
+            await foreach (string s in stepResult.ContentStream.WithCancellation(cancellationToken))
+            {
+                // TODO: trigger FunctionResultData event with content in 's', for all registered observers.
+            }
+
+            // Update variables with the output of the last function
+            var stringResult = await stepResult!.ReadContentAsync(cancellationToken).ConfigureAwait(false);
+
+            dynamic? data = JsonSerializer.Deserialize<dynamic>(stringResult);
+            return data;
+        }
+        catch (Exception e)
+        {
+            this._logger.LogError(e, "Something went wrong in kernel function: {1}.{2}. Error: {3}",
+                skFunction.SkillName, skFunction.Name, e.Message);
+            throw;
+        }
+    }
+
+    public async Task<TResult?> RunAsync<TResult>(ISKFunction skFunction,
+        ContextVariables? variables = null,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await this.RunAsyncDynamic(skFunction, variables, cancellationToken).ConfigureAwait(false);
+        return result?.To<TResult>();
+    }
+
+    // Call pattern wuth KernelResult.
 
     /// <inheritdoc/>
     public async Task<KernelResult> RunAsync(ISKFunction skFunction,
