@@ -14,7 +14,7 @@ internal static class FunctionHelpers
     /// <summary>
     /// Invokes a function on a skill instance via the kernel.
     /// </summary>
-    public static Task<KernelResult> CallViaKernel(
+    public static Task<dynamic?> CallViaKernel(
         object skillInstance,
         string methodName,
         params (string Name, string Value)[] variables)

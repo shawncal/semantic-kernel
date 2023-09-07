@@ -148,10 +148,16 @@ public sealed class Kernel : IKernel, IDisposable
         this._memory = memory;
     }
 
-    // Call pattern ideas with dynamic, generics.
-    // With this approach, the 'KernelResult' class is no longer needed!!!!
+    public async Task<TResult?> RunAsync<TResult>(ISKFunction skFunction,
+        ContextVariables? variables = null,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await this.RunAsync(skFunction, variables, cancellationToken).ConfigureAwait(false);
+        return result?.To<TResult>();
+    }
 
-    public async Task<dynamic?> RunAsyncDynamic(ISKFunction skFunction,
+    /// <inheritdoc/>
+    private async Task<FunctionResult> RunFunctionAsync(ISKFunction skFunction,
         ContextVariables? variables = null,
         CancellationToken cancellationToken = default)
     {
@@ -170,13 +176,9 @@ public sealed class Kernel : IKernel, IDisposable
                 // TODO: trigger FunctionResultData event with content in 's', for all registered observers.
             }
 
-            // Update variables with the output of the last function
-            var stringResult = await stepResult!.ReadContentAsync(cancellationToken).ConfigureAwait(false);
-
-            dynamic? data = JsonSerializer.Deserialize<dynamic>(stringResult);
-            return data;
+            return stepResult;
         }
-        catch (Exception e)
+        catch (Exception e) when (!e.IsCriticalException())
         {
             this._logger.LogError(e, "Something went wrong in kernel function: {1}.{2}. Error: {3}",
                 skFunction.SkillName, skFunction.Name, e.Message);
@@ -184,69 +186,54 @@ public sealed class Kernel : IKernel, IDisposable
         }
     }
 
-    public async Task<TResult?> RunAsync<TResult>(ISKFunction skFunction,
-        ContextVariables? variables = null,
-        CancellationToken cancellationToken = default)
-    {
-        var result = await this.RunAsyncDynamic(skFunction, variables, cancellationToken).ConfigureAwait(false);
-        return result?.To<TResult>();
-    }
-
-    // Call pattern wuth KernelResult.
-
     /// <inheritdoc/>
-    public async Task<KernelResult> RunAsync(ISKFunction skFunction,
+    public async Task<dynamic?> RunAsync(ISKFunction skFunction,
         ContextVariables? variables = null,
         CancellationToken cancellationToken = default)
     {
         try
         {
-            var context = new SKContext(
-                variables,
-                this._skillCollection,
-                this.LoggerFactory);
+            var functionResult = await this.RunFunctionAsync(skFunction, variables, cancellationToken).ConfigureAwait(false);
+            var stringResult = await functionResult!.ReadContentAsync(cancellationToken).ConfigureAwait(false);
 
-            cancellationToken.ThrowIfCancellationRequested();
-            FunctionResult? stepResult = await skFunction.InvokeAsync(context, cancellationToken: cancellationToken).ConfigureAwait(false);
-
-            await foreach (string s in stepResult.ContentStream.WithCancellation(cancellationToken))
+            dynamic? data = JsonSerializer.Deserialize<dynamic>(stringResult);
+            if (data is not null)
             {
-                // TODO: trigger FunctionResultData event with content in 's', for all registered observers.
+                return data;
             }
 
-            // Update variables with the output of the last function
-            return new KernelResult(await stepResult!.ReadContentAsync(cancellationToken).ConfigureAwait(false));
+            return stringResult;
         }
         catch (Exception e) when (!e.IsCriticalException())
         {
             this._logger.LogError(e, "Something went wrong in kernel function: {1}.{2}. Error: {3}",
                 skFunction.SkillName, skFunction.Name, e.Message);
-            return new KernelResult(e);
+            throw;
         }
     }
 
     /// <inheritdoc/>
-    public Task<KernelResult> RunAsync(params ISKFunction[] pipeline)
+    public Task<dynamic?> RunAsync(params ISKFunction[] pipeline)
         => this.RunAsync(new ContextVariables(), pipeline);
 
     /// <inheritdoc/>
-    public Task<KernelResult> RunAsync(string input, params ISKFunction[] pipeline)
+    public Task<dynamic?> RunAsync(string input, params ISKFunction[] pipeline)
         => this.RunAsync(new ContextVariables(input), pipeline);
 
     /// <inheritdoc/>
-    public Task<KernelResult> RunAsync(ContextVariables variables, params ISKFunction[] pipeline)
+    public Task<dynamic?> RunAsync(ContextVariables variables, params ISKFunction[] pipeline)
         => this.RunAsync(variables, CancellationToken.None, pipeline);
 
     /// <inheritdoc/>
-    public Task<KernelResult> RunAsync(CancellationToken cancellationToken, params ISKFunction[] pipeline)
+    public Task<dynamic?> RunAsync(CancellationToken cancellationToken, params ISKFunction[] pipeline)
         => this.RunAsync(new ContextVariables(), cancellationToken, pipeline);
 
     /// <inheritdoc/>
-    public Task<KernelResult> RunAsync(string input, CancellationToken cancellationToken, params ISKFunction[] pipeline)
+    public Task<dynamic?> RunAsync(string input, CancellationToken cancellationToken, params ISKFunction[] pipeline)
         => this.RunAsync(new ContextVariables(input), cancellationToken, pipeline);
 
     /// <inheritdoc/>
-    public async Task<KernelResult> RunAsync(ContextVariables variables, CancellationToken cancellationToken, params ISKFunction[] pipeline)
+    public async Task<dynamic?> RunAsync(ContextVariables variables, CancellationToken cancellationToken, params ISKFunction[] pipeline)
     {
         int pipelineStepCount = 0;
         FunctionResult? stepResult = null;
@@ -260,12 +247,7 @@ public sealed class Kernel : IKernel, IDisposable
                     this.LoggerFactory);
 
                 cancellationToken.ThrowIfCancellationRequested();
-                stepResult = await f.InvokeAsync(context, cancellationToken: cancellationToken).ConfigureAwait(false);
-
-                await foreach (string s in stepResult.ContentStream.WithCancellation(cancellationToken))
-                {
-                    // TODO: trigger FunctionResultData event
-                }
+                stepResult = await this.RunFunctionAsync(f, variables, cancellationToken).ConfigureAwait(false);
 
                 // Update variables with the output of the previous function
                 variables["input"] = await stepResult.ReadContentAsync().ConfigureAwait(false);
@@ -274,13 +256,20 @@ public sealed class Kernel : IKernel, IDisposable
             {
                 this._logger.LogError(e, "Something went wrong in pipeline step {0}: {1}.{2}. Error: {3}",
                     pipelineStepCount, f.SkillName, f.Name, e.Message);
-                return new KernelResult(e);
+                throw;
             }
 
             pipelineStepCount++;
         }
 
-        return new KernelResult(await stepResult!.ReadContentAsync().ConfigureAwait(false));
+        var stringResult = await stepResult!.ReadContentAsync().ConfigureAwait(false);
+        dynamic? data = JsonSerializer.Deserialize<dynamic>(stringResult);
+        if (data is not null)
+        {
+            return data;
+        }
+
+        return stringResult;
     }
 
     /// <inheritdoc/>
