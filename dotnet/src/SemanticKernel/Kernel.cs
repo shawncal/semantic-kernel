@@ -156,34 +156,34 @@ public sealed class Kernel : IKernel, IDisposable
 
     /// <inheritdoc/>
     public Task<SKContext> RunAsync(ISKFunction skFunction,
-        ContextVariables? variables = null,
+        IDictionary<string, string>? args = null,
         CancellationToken cancellationToken = default)
-        => this.RunAsync(variables ?? new(), cancellationToken, skFunction);
+        => this.RunAsync(args ?? new Dictionary<string, string>(), cancellationToken, skFunction);
 
     /// <inheritdoc/>
     public Task<SKContext> RunAsync(params ISKFunction[] pipeline)
-        => this.RunAsync(new ContextVariables(), pipeline);
+        => this.RunAsync(new Dictionary<string, string>(), pipeline);
 
     /// <inheritdoc/>
     public Task<SKContext> RunAsync(string input, params ISKFunction[] pipeline)
-        => this.RunAsync(new ContextVariables(input), pipeline);
+        => this.RunAsync(new Dictionary<string, string>() { ["input"] = input }, pipeline);
 
     /// <inheritdoc/>
-    public Task<SKContext> RunAsync(ContextVariables variables, params ISKFunction[] pipeline)
-        => this.RunAsync(variables, CancellationToken.None, pipeline);
+    public Task<SKContext> RunAsync(IDictionary<string, string> args, params ISKFunction[] pipeline)
+        => this.RunAsync(args, CancellationToken.None, pipeline);
 
     /// <inheritdoc/>
     public Task<SKContext> RunAsync(CancellationToken cancellationToken, params ISKFunction[] pipeline)
-        => this.RunAsync(new ContextVariables(), cancellationToken, pipeline);
+        => this.RunAsync(new Dictionary<string, string>(), cancellationToken, pipeline);
 
     /// <inheritdoc/>
     public Task<SKContext> RunAsync(string input, CancellationToken cancellationToken, params ISKFunction[] pipeline)
-        => this.RunAsync(new ContextVariables(input), cancellationToken, pipeline);
+        => this.RunAsync(new Dictionary<string, string>() { ["input"] = input }, cancellationToken, pipeline);
 
     /// <inheritdoc/>
-    public async Task<SKContext> RunAsync(ContextVariables variables, CancellationToken cancellationToken, params ISKFunction[] pipeline)
+    public async Task<SKContext> RunAsync(IDictionary<string, string> args, CancellationToken cancellationToken, params ISKFunction[] pipeline)
     {
-        var context = new SKContext(this, variables);
+        var context = new SKContext(this, args);
 
         int pipelineStepCount = 0;
         foreach (ISKFunction skFunction in pipeline)

@@ -204,7 +204,7 @@ public static class XmlMarkupPlanParser
                         : !context.Skills!.TryGetFunction(skillName, functionName, out var _))
                 {
                     var planStep = new Plan(node.InnerText);
-                    planStep.Parameters.Update(node.InnerText);
+                    planStep.Parameters["input"] = (node.InnerText);
                     planStep.Outputs.Add($"markup.{functionName}.result");
                     plan.Outputs.Add($"markup.{functionName}.result");
                     plan.AddSteps(planStep);
@@ -215,7 +215,7 @@ public static class XmlMarkupPlanParser
                         ? context.Skills.GetFunction(functionName)
                         : context.Skills.GetFunction(skillName, functionName);
                     var planStep = new Plan(command);
-                    planStep.Parameters.Update(node.InnerText);
+                    planStep.Parameters["input"] = node.InnerText;
                     planStep.Outputs.Add($"markup.{functionName}.result");
                     plan.Outputs.Add($"markup.{functionName}.result");
                     plan.AddSteps(planStep);

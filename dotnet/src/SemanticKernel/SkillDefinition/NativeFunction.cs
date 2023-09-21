@@ -453,7 +453,7 @@ internal sealed class NativeFunction : ISKFunction, IDisposable
             object? parameterFunc(SKContext context, CancellationToken _)
             {
                 // 1. Use the value of the variable if it exists.
-                if (context.Variables.TryGetValue(name, out string? value))
+                if (context.Args.TryGetValue(name, out string? value))
                 {
                     return Process(value);
                 }
@@ -465,9 +465,9 @@ internal sealed class NativeFunction : ISKFunction, IDisposable
                 }
 
                 // 3. Otherwise, use "input" if this is the first (or only) parameter.
-                if (fallBackToInput)
+                if (fallBackToInput && context.Args.TryGetValue("input", out var input))
                 {
-                    return Process(context.Variables.Input);
+                    return Process(input);
                 }
 
                 // 4. Otherwise, fail.

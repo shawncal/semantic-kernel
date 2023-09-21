@@ -30,7 +30,7 @@ public sealed class Plan : IPlan
     /// </summary>
     [JsonPropertyName("state")]
     [JsonConverter(typeof(ContextVariablesConverter))]
-    public ContextVariables State { get; } = new();
+    public IDictionary<string, string> State { get; } = new Dictionary<string, string>();
 
     /// <summary>
     /// Steps of the plan
@@ -43,7 +43,7 @@ public sealed class Plan : IPlan
     /// </summary>
     [JsonPropertyName("parameters")]
     [JsonConverter(typeof(ContextVariablesConverter))]
-    public ContextVariables Parameters { get; set; } = new();
+    public IDictionary<string, string> Parameters { get; set; } = new Dictionary<string, string>();
 
     /// <summary>
     /// Outputs for the plan, used to pass information to the caller
@@ -131,7 +131,7 @@ public sealed class Plan : IPlan
     /// <param name="description">The description of the plan.</param>
     /// <param name="nextStepIndex">The index of the next step.</param>
     /// <param name="state">The state of the plan.</param>
-    /// <param name="parameters">The parameters of the plan.</param>
+    /// <param name="args">The arguments of the plan.</param>
     /// <param name="outputs">The outputs of the plan.</param>
     /// <param name="steps">The steps of the plan.</param>
     [JsonConstructor]
@@ -140,8 +140,8 @@ public sealed class Plan : IPlan
         string skillName,
         string description,
         int nextStepIndex,
-        ContextVariables state,
-        ContextVariables parameters,
+        IDictionary<string, string> state,
+        IDictionary<string, string> args,
         IList<string> outputs,
         IReadOnlyList<Plan> steps)
     {
@@ -150,7 +150,7 @@ public sealed class Plan : IPlan
         this.Description = description;
         this.NextStepIndex = nextStepIndex;
         this.State = state;
-        this.Parameters = parameters;
+        this.Parameters = args;
         this.Outputs = outputs;
         this._steps.Clear();
         this.AddSteps(steps.ToArray());
@@ -215,7 +215,7 @@ public sealed class Plan : IPlan
     /// Runs the next step in the plan using the provided kernel instance and variables.
     /// </summary>
     /// <param name="kernel">The kernel instance to use for executing the plan.</param>
-    /// <param name="variables">The variables to use for the execution of the plan.</param>
+    /// <param name="args">The arguments to use for the execution of the plan.</param>
     /// <param name="cancellationToken">The <see cref="CancellationToken"/> to monitor for cancellation requests. The default is <see cref="CancellationToken.None"/>.</param>
     /// <returns>A task representing the asynchronous execution of the plan's next step.</returns>
     /// <remarks>
@@ -223,11 +223,11 @@ public sealed class Plan : IPlan
     /// The context variables contain the necessary information for executing the plan, such as the skills, and logger.
     /// The method returns a task representing the asynchronous execution of the plan's next step.
     /// </remarks>
-    public Task<Plan> RunNextStepAsync(IKernel kernel, ContextVariables variables, CancellationToken cancellationToken = default)
+    public Task<Plan> RunNextStepAsync(IKernel kernel, IDictionary<string, string> args, CancellationToken cancellationToken = default)
     {
         var context = new SKContext(
             kernel,
-            variables,
+            args,
             kernel.Skills);
 
         return this.InvokeNextStepAsync(context, cancellationToken);
@@ -246,8 +246,8 @@ public sealed class Plan : IPlan
         {
             var step = this.Steps[this.NextStepIndex];
 
-            // Merge the state with the current context variables for step execution
-            var functionVariables = this.GetNextStepVariables(context.Variables, step);
+            // Merge the state with the current args for step execution
+            var functionVariables = this.GetNextStepArgs(context.Args, step);
 
             // Execute the step
             var functionContext = new SKContext(context.Kernel, functionVariables, context.Skills);
@@ -259,31 +259,31 @@ public sealed class Plan : IPlan
             #region Update State
 
             // Update state with result
-            this.State.Update(resultValue);
+            this.State["input"] = resultValue;
 
             // Update Plan Result in State with matching outputs (if any)
             if (this.Outputs.Intersect(step.Outputs).Any())
             {
                 if (this.State.TryGetValue(DefaultResultKey, out string? currentPlanResult))
                 {
-                    this.State.Set(DefaultResultKey, $"{currentPlanResult}\n{resultValue}");
+                    this.State[DefaultResultKey] = $"{currentPlanResult}\n{resultValue}";
                 }
                 else
                 {
-                    this.State.Set(DefaultResultKey, resultValue);
+                    this.State[DefaultResultKey] = resultValue;
                 }
             }
 
             // Update state with outputs (if any)
             foreach (var item in step.Outputs)
             {
-                if (result.Variables.TryGetValue(item, out string? val))
+                if (result.Args.TryGetValue(item, out string? val))
                 {
-                    this.State.Set(item, val);
+                    this.State[item] = val;
                 }
                 else
                 {
-                    this.State.Set(item, resultValue);
+                    this.State[item] = resultValue;
                 }
             }
 
@@ -332,20 +332,20 @@ public sealed class Plan : IPlan
     {
         if (this.Function is not null)
         {
-            AddVariablesToContext(this.State, context);
+            AddArgsToContext(this.State, context);
             var result = await this.Function
                 .WithInstrumentation(context.LoggerFactory)
                 .InvokeAsync(context, requestSettings, cancellationToken)
                 .ConfigureAwait(false);
 
-            context.Variables.Update(result.Result);
+            context.Args["input"] = result.Result;
         }
         else
         {
             // loop through steps and execute until completion
             while (this.HasNextStep)
             {
-                AddVariablesToContext(this.State, context);
+                AddArgsToContext(this.State, context);
                 await this.InvokeNextStepAsync(context, cancellationToken).ConfigureAwait(false);
                 this.UpdateContextWithOutputs(context);
             }
@@ -377,10 +377,10 @@ public sealed class Plan : IPlan
     /// <summary>
     /// Expand variables in the input string.
     /// </summary>
-    /// <param name="variables">Variables to use for expansion.</param>
+    /// <param name="args">Args to use for expansion.</param>
     /// <param name="input">Input string to expand.</param>
     /// <returns>Expanded string.</returns>
-    internal string ExpandFromVariables(ContextVariables variables, string input)
+    internal string ExpandFromVariables(IDictionary<string, string> args, string input)
     {
         var result = input;
         var matches = s_variablesRegex.Matches(input);
@@ -388,7 +388,7 @@ public sealed class Plan : IPlan
 
         foreach (var varName in orderedMatches)
         {
-            if (variables.TryGetValue(varName, out string? value) || this.State.TryGetValue(varName, out value))
+            if (args.TryGetValue(varName, out string? value) || this.State.TryGetValue(varName, out value))
             {
                 result = result.Replace($"${varName}", value);
             }
@@ -434,16 +434,16 @@ public sealed class Plan : IPlan
     }
 
     /// <summary>
-    /// Add any missing variables from a plan state variables to the context.
+    /// Add any missing args from a plan state variables to the context.
     /// </summary>
-    private static void AddVariablesToContext(ContextVariables vars, SKContext context)
+    private static void AddArgsToContext(IDictionary<string, string> args, SKContext context)
     {
-        // Loop through vars and add anything missing to context
-        foreach (var item in vars)
+        // Loop through args and add anything missing to context
+        foreach (var item in args)
         {
-            if (!context.Variables.TryGetValue(item.Key, out string? value) || string.IsNullOrEmpty(value))
+            if (!context.Args.TryGetValue(item.Key, out string? value) || string.IsNullOrEmpty(value))
             {
-                context.Variables.Set(item.Key, item.Value);
+                context.Args[item.Key] = item.Value;
             }
         }
     }
@@ -456,18 +456,18 @@ public sealed class Plan : IPlan
     private SKContext UpdateContextWithOutputs(SKContext context)
     {
         var resultString = this.State.TryGetValue(DefaultResultKey, out string? result) ? result : this.State.ToString();
-        context.Variables.Update(resultString);
+        context.Args["input"] = resultString;
 
         // copy previous step's variables to the next step
         foreach (var item in this._steps[this.NextStepIndex - 1].Outputs)
         {
             if (this.State.TryGetValue(item, out string? val))
             {
-                context.Variables.Set(item, val);
+                context.Args[item] = val;
             }
             else
             {
-                context.Variables.Set(item, resultString);
+                context.Args[item] = resultString;
             }
         }
 
@@ -475,12 +475,12 @@ public sealed class Plan : IPlan
     }
 
     /// <summary>
-    /// Get the variables for the next step in the plan.
+    /// Get the args for the next step in the plan.
     /// </summary>
-    /// <param name="variables">The current context variables.</param>
+    /// <param name="currentArgs">The current args.</param>
     /// <param name="step">The next step in the plan.</param>
     /// <returns>The context variables for the next step in the plan.</returns>
-    private ContextVariables GetNextStepVariables(ContextVariables variables, Plan step)
+    private ContextVariables GetNextStepArgs(IDictionary<string, string> currentArgs, Plan step)
     {
         // Priority for Input
         // - Parameters (expand from variables if needed)
@@ -490,17 +490,17 @@ public sealed class Plan : IPlan
         // - Plan.Description
 
         var input = string.Empty;
-        if (!string.IsNullOrEmpty(step.Parameters.Input))
+        if (this.Parameters.TryGetValue("input", out var argsInput) && !string.IsNullOrEmpty(argsInput))
         {
-            input = this.ExpandFromVariables(variables, step.Parameters.Input!);
+            input = this.ExpandFromVariables(currentArgs, argsInput);
         }
-        else if (!string.IsNullOrEmpty(variables.Input))
+        else if (!string.IsNullOrEmpty(currentArgs["input"]))
         {
-            input = variables.Input;
+            input = currentArgs["input"];
         }
-        else if (!string.IsNullOrEmpty(this.State.Input))
+        else if (this.State.TryGetValue("input", out var stateInput) && !string.IsNullOrEmpty(stateInput))
         {
-            input = this.State.Input;
+            input = stateInput;
         }
         else if (step.Steps.Count > 0)
         {
@@ -525,7 +525,7 @@ public sealed class Plan : IPlan
                 continue;
             }
 
-            if (variables.TryGetValue(param.Name, out string? value))
+            if (currentArgs.TryGetValue(param.Name, out string? value))
             {
                 stepVariables.Set(param.Name, value);
             }
@@ -543,12 +543,12 @@ public sealed class Plan : IPlan
                 continue;
             }
 
-            var expandedValue = this.ExpandFromVariables(variables, item.Value);
+            var expandedValue = this.ExpandFromVariables(currentArgs, item.Value);
             if (!expandedValue.Equals(item.Value, StringComparison.OrdinalIgnoreCase))
             {
                 stepVariables.Set(item.Key, expandedValue);
             }
-            else if (variables.TryGetValue(item.Key, out string? value))
+            else if (currentArgs.TryGetValue(item.Key, out string? value))
             {
                 stepVariables.Set(item.Key, value);
             }
@@ -562,7 +562,7 @@ public sealed class Plan : IPlan
             }
         }
 
-        foreach (KeyValuePair<string, string> item in variables)
+        foreach (KeyValuePair<string, string> item in currentArgs)
         {
             if (!stepVariables.ContainsKey(item.Key))
             {

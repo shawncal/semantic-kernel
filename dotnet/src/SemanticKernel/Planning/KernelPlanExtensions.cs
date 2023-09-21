@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.SemanticKernel.Orchestration;
@@ -65,12 +66,12 @@ public static class KernelPlanExtensions
     /// Run the next step in a plan asynchronously
     /// </summary>
     /// <param name="kernel">Kernel instance to use</param>
-    /// <param name="variables">Input to process</param>
+    /// <param name="args">Input to process</param>
     /// <param name="plan">Plan to run</param>
     /// <param name="cancellationToken">The <see cref="CancellationToken"/> to monitor for cancellation requests. The default is <see cref="CancellationToken.None"/>.</param>
     /// <returns>Result of the plan execution</returns>
-    public static Task<Plan> StepAsync(this IKernel kernel, ContextVariables variables, Plan plan, CancellationToken cancellationToken = default)
+    public static Task<Plan> StepAsync(this IKernel kernel, IDictionary<string, string> args, Plan plan, CancellationToken cancellationToken = default)
     {
-        return plan.RunNextStepAsync(kernel, variables, cancellationToken);
+        return plan.RunNextStepAsync(kernel, args, cancellationToken);
     }
 }

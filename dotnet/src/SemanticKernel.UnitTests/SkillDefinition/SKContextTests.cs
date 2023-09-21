@@ -24,26 +24,26 @@ public class SKContextTests
     }
 
     [Fact]
-    public void ItHasHelpersForContextVariables()
+    public void ItHasHelpersForArgs()
     {
         // Arrange
-        var variables = new ContextVariables();
-        var target = new SKContext(this._kernel.Object, variables, skills: this._skills.Object);
-        variables.Set("foo1", "bar1");
+        var args = new Dictionary<string, string>();
+        var target = new SKContext(this._kernel.Object, args, skills: this._skills.Object);
+        args["foo1"] = "bar1";
 
         // Act
-        target.Variables["foo2"] = "bar2";
-        target.Variables["INPUT"] = Guid.NewGuid().ToString("N");
+        target.Args["foo2"] = "bar2";
+        target.Args["INPUT"] = Guid.NewGuid().ToString("N");
 
         // Assert
-        Assert.Equal("bar1", target.Variables["foo1"]);
-        Assert.Equal("bar1", target.Variables["foo1"]);
-        Assert.Equal("bar2", target.Variables["foo2"]);
-        Assert.Equal("bar2", target.Variables["foo2"]);
-        Assert.Equal(target.Variables["INPUT"], target.Result);
-        Assert.Equal(target.Variables["INPUT"], target.ToString());
-        Assert.Equal(target.Variables["INPUT"], target.Variables.Input);
-        Assert.Equal(target.Variables["INPUT"], target.Variables.ToString());
+        Assert.Equal("bar1", target.Args["foo1"]);
+        Assert.Equal("bar1", target.Args["foo1"]);
+        Assert.Equal("bar2", target.Args["foo2"]);
+        Assert.Equal("bar2", target.Args["foo2"]);
+        Assert.Equal(target.Args["INPUT"], target.Result);
+        Assert.Equal(target.Args["INPUT"], target.ToString());
+        Assert.Equal(target.Args["INPUT"], target.Args["input"]);
+        Assert.Equal(target.Args["INPUT"], target.Args.ToString());
     }
 
     [Fact]

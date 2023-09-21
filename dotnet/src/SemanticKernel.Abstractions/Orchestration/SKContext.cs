@@ -38,9 +38,14 @@ public sealed class SKContext
     }
 
     /// <summary>
-    /// User variables
+    /// User-specified function arguments (legacy - use Args)
     /// </summary>
     public ContextVariables Variables { get; }
+
+    /// <summary>
+    /// User-specified function arguments
+    /// </summary>
+    public IDictionary<string, string> Args => this.Variables;
 
     /// <summary>
     /// Read only skills collection
@@ -71,17 +76,17 @@ public sealed class SKContext
     /// Constructor for the context.
     /// </summary>
     /// <param name="kernel">Kernel reference</param>
-    /// <param name="variables">Context variables to include in context.</param>
+    /// <param name="args">Function arguments to include in context.</param>
     /// <param name="skills">Skills to include in context.</param>
     public SKContext(
         IKernel kernel,
-        ContextVariables? variables = null,
+        IDictionary<string, string>? args = null,
         IReadOnlySkillCollection? skills = null)
     {
         Verify.NotNull(kernel, nameof(kernel));
 
         this._originalKernel = kernel;
-        this.Variables = variables ?? new();
+        this.Variables = args != null ? new(args) : new();
         this.Skills = skills ?? NullReadOnlySkillCollection.Instance;
         this.LoggerFactory = kernel.LoggerFactory;
         this._culture = CultureInfo.CurrentCulture;
@@ -91,10 +96,11 @@ public sealed class SKContext
     /// Constructor for the context.
     /// </summary>
     /// <param name="kernel">Kernel instance parameter</param>
-    /// <param name="variables">Context variables to include in context.</param>
+    /// <param name="args">Function arguments to include in context.</param>
     public SKContext(
         IKernel kernel,
-        ContextVariables? variables = null) : this(kernel, variables, kernel.Skills)
+        IDictionary<string, string>? args = null)
+        : this(kernel, args, kernel.Skills)
     {
     }
 
@@ -105,7 +111,8 @@ public sealed class SKContext
     /// <param name="skills">Skills to include in context.</param>
     public SKContext(
         IKernel kernel,
-        IReadOnlySkillCollection? skills = null) : this(kernel, null, skills)
+        IReadOnlySkillCollection? skills = null)
+        : this(kernel, null, skills)
     {
     }
 
@@ -113,7 +120,8 @@ public sealed class SKContext
     /// Constructor for the context.
     /// </summary>
     /// <param name="kernel">Kernel instance parameter</param>
-    public SKContext(IKernel kernel) : this(kernel, null, kernel.Skills)
+    public SKContext(IKernel kernel)
+        : this(kernel, null, kernel.Skills)
     {
     }
 
@@ -135,7 +143,7 @@ public sealed class SKContext
     {
         return new SKContext(
             kernel: this._originalKernel,
-            variables: this.Variables.Clone())
+            args: this.Variables)
         {
             Culture = this.Culture,
         };
@@ -156,12 +164,12 @@ public sealed class SKContext
     {
         get
         {
-            string display = this.Variables.DebuggerDisplay;
+            string display = $"Args: {this.Args.Count}";
 
             if (this.Skills is IReadOnlySkillCollection skills)
             {
                 var view = skills.GetFunctionViews();
-                display += $", Skills = {view.Count}";
+                display += $", Skills: {view.Count}";
             }
 
             display += $", Culture = {this.Culture.EnglishName}";

@@ -254,7 +254,7 @@ public class ContextVariablesTests
 
         // Act
         // Clone original into target
-        ContextVariables target = original.Clone();
+        ContextVariables target = new(original);
         // Update original
         original.Update(someOtherMainContent);
         original.Set(anyName, someOtherContent);

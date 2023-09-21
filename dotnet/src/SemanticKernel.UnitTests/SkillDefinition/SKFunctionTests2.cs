@@ -126,11 +126,11 @@ public sealed class SKFunctionTests2
         static void Test(SKContext context)
         {
             s_actual = s_expected;
-            context.Variables["canary"] = s_expected;
+            context.Args["canary"] = s_expected;
         }
 
         var context = this.MockContext("xy");
-        context.Variables["someVar"] = "qz";
+        context.Args["someVar"] = "qz";
 
         // Act
         var function = SKFunction.FromNativeMethod(Method(Test), loggerFactory: this._logger.Object);
@@ -139,7 +139,7 @@ public sealed class SKFunctionTests2
 
         // Assert
         Assert.Equal(s_expected, s_actual);
-        Assert.Equal(s_expected, context.Variables["canary"]);
+        Assert.Equal(s_expected, context.Args["canary"]);
     }
 
     [Fact]
@@ -148,12 +148,12 @@ public sealed class SKFunctionTests2
         // Arrange
         static string Test(SKContext context)
         {
-            s_actual = context.Variables["someVar"];
+            s_actual = context.Args["someVar"];
             return "abc";
         }
 
         var context = this.MockContext("");
-        context.Variables["someVar"] = s_expected;
+        context.Args["someVar"] = s_expected;
 
         // Act
         var function = SKFunction.FromNativeMethod(Method(Test), loggerFactory: this._logger.Object);
@@ -174,12 +174,12 @@ public sealed class SKFunctionTests2
         string? Test(SKContext context)
         {
             invocationCount++;
-            s_actual = context.Variables["someVar"];
+            s_actual = context.Args["someVar"];
             return "abc";
         }
 
         var context = this.MockContext("");
-        context.Variables["someVar"] = s_expected;
+        context.Args["someVar"] = s_expected;
 
         // Act
         Func<SKContext, string?> method = Test;
@@ -203,7 +203,7 @@ public sealed class SKFunctionTests2
         {
             invocationCount++;
             s_actual = s_expected;
-            context.Variables["canary"] = s_expected;
+            context.Args["canary"] = s_expected;
             return Task.FromResult(s_expected);
         }
 
@@ -219,7 +219,7 @@ public sealed class SKFunctionTests2
         Assert.Equal(1, invocationCount);
         Assert.Equal(s_expected, s_actual);
         Assert.Equal(s_actual, context.Result);
-        Assert.Equal(s_expected, context.Variables["canary"]);
+        Assert.Equal(s_expected, context.Args["canary"]);
     }
 
     [Fact]
@@ -233,8 +233,8 @@ public sealed class SKFunctionTests2
             await Task.Delay(0);
             invocationCount++;
             s_actual = s_expected;
-            context.Variables.Update("foo");
-            context.Variables["canary"] = s_expected;
+            context.Args["input"] = "foo";
+            context.Args["canary"] = s_expected;
             return context;
         }
 
@@ -249,7 +249,7 @@ public sealed class SKFunctionTests2
         // Assert
         Assert.Equal(1, invocationCount);
         Assert.Equal(s_expected, s_actual);
-        Assert.Equal(s_expected, context.Variables["canary"]);
+        Assert.Equal(s_expected, context.Args["canary"]);
         Assert.Equal("foo", context.Result);
     }
 
@@ -342,8 +342,8 @@ public sealed class SKFunctionTests2
         {
             invocationCount++;
             s_actual = s_expected;
-            context.Variables.Update("x y z");
-            context.Variables["canary"] = s_expected;
+            context.Args["input"] = "x y z";
+            context.Args["canary"] = s_expected;
         }
 
         var context = this.MockContext("");
@@ -357,7 +357,7 @@ public sealed class SKFunctionTests2
         // Assert
         Assert.Equal(1, invocationCount);
         Assert.Equal(s_expected, s_actual);
-        Assert.Equal(s_expected, context.Variables["canary"]);
+        Assert.Equal(s_expected, context.Args["canary"]);
         Assert.Equal("x y z", context.Result);
     }
 
@@ -371,8 +371,8 @@ public sealed class SKFunctionTests2
         {
             invocationCount++;
             s_actual = s_expected;
-            context.Variables.Update("x y z");
-            context.Variables["canary"] = s_expected;
+            context.Args["input"] = "x y z";
+            context.Args["canary"] = s_expected;
         }
 
         var context = this.MockContext("");
@@ -386,7 +386,7 @@ public sealed class SKFunctionTests2
         // Assert
         Assert.Equal(1, invocationCount);
         Assert.Equal(s_expected, s_actual);
-        Assert.Equal(s_expected, context.Variables["canary"]);
+        Assert.Equal(s_expected, context.Args["canary"]);
         Assert.Equal("x y z", context.Result);
     }
 
@@ -397,8 +397,8 @@ public sealed class SKFunctionTests2
         static string Test(string input, SKContext context)
         {
             s_actual = s_expected;
-            context.Variables["canary"] = s_expected;
-            context.Variables.Update("x y z");
+            context.Args["canary"] = s_expected;
+            context.Args["input"] = "x y z";
             // This value should overwrite "x y z"
             return "new data";
         }
@@ -412,7 +412,7 @@ public sealed class SKFunctionTests2
 
         // Assert
         Assert.Equal(s_expected, s_actual);
-        Assert.Equal(s_expected, context.Variables["canary"]);
+        Assert.Equal(s_expected, context.Args["canary"]);
         Assert.Equal("new data", context.Result);
     }
 
@@ -423,8 +423,8 @@ public sealed class SKFunctionTests2
         static Task<string> Test(string input, SKContext context)
         {
             s_actual = s_expected;
-            context.Variables["canary"] = s_expected;
-            context.Variables.Update("x y z");
+            context.Args["canary"] = s_expected;
+            context.Args["input"] = "x y z";
             // This value should overwrite "x y z"
             return Task.FromResult("new data");
         }
@@ -438,7 +438,7 @@ public sealed class SKFunctionTests2
 
         // Assert
         Assert.Equal(s_expected, s_actual);
-        Assert.Equal(s_expected, context.Variables["canary"]);
+        Assert.Equal(s_expected, context.Args["canary"]);
         Assert.Equal("new data", context.Result);
     }
 
@@ -449,8 +449,8 @@ public sealed class SKFunctionTests2
         static Task<SKContext> Test(string input, SKContext context)
         {
             s_actual = s_expected;
-            context.Variables["canary"] = s_expected;
-            context.Variables.Update("x y z");
+            context.Args["canary"] = s_expected;
+            context.Args["input"] = "x y z";
 
             // This value should overwrite "x y z". Contexts are merged.
             var newContext = new SKContext(
@@ -458,14 +458,14 @@ public sealed class SKFunctionTests2
                 new ContextVariables(input),
                 skills: new Mock<IReadOnlySkillCollection>().Object);
 
-            newContext.Variables.Update("new data");
-            newContext.Variables["canary2"] = "222";
+            newContext.Args["input"] = "new data";
+            newContext.Args["canary2"] = "222";
 
             return Task.FromResult(newContext);
         }
 
         var oldContext = this.MockContext("");
-        oldContext.Variables["legacy"] = "something";
+        oldContext.Args["legacy"] = "something";
 
         // Act
         var function = SKFunction.FromNativeMethod(Method(Test), loggerFactory: this._logger.Object);
@@ -475,17 +475,17 @@ public sealed class SKFunctionTests2
         // Assert
         Assert.Equal(s_expected, s_actual);
 
-        Assert.True(oldContext.Variables.ContainsKey("canary"));
-        Assert.False(oldContext.Variables.ContainsKey("canary2"));
+        Assert.True(oldContext.Args.ContainsKey("canary"));
+        Assert.False(oldContext.Args.ContainsKey("canary2"));
 
-        Assert.False(newContext.Variables.ContainsKey("canary"));
-        Assert.True(newContext.Variables.ContainsKey("canary2"));
+        Assert.False(newContext.Args.ContainsKey("canary"));
+        Assert.True(newContext.Args.ContainsKey("canary2"));
 
-        Assert.Equal(s_expected, oldContext.Variables["canary"]);
-        Assert.Equal("222", newContext.Variables["canary2"]);
+        Assert.Equal(s_expected, oldContext.Args["canary"]);
+        Assert.Equal("222", newContext.Args["canary2"]);
 
-        Assert.True(oldContext.Variables.ContainsKey("legacy"));
-        Assert.False(newContext.Variables.ContainsKey("legacy"));
+        Assert.True(oldContext.Args.ContainsKey("legacy"));
+        Assert.False(newContext.Args.ContainsKey("legacy"));
 
         Assert.Equal("x y z", oldContext.Result);
         Assert.Equal("new data", newContext.Result);
@@ -514,7 +514,7 @@ public sealed class SKFunctionTests2
         SKContext newContext = await function.InvokeAsync(oldContext);
 
         // Assert
-        Assert.Equal("testabc", newContext.Variables.Input);
+        Assert.Equal("testabc", newContext.Args["input"]);
     }
 
     [Fact]
@@ -566,8 +566,8 @@ public sealed class SKFunctionTests2
         static Task TestAsync(SKContext context)
         {
             s_actual = s_expected;
-            context.Variables["canary"] = s_expected;
-            context.Variables.Update("x y z");
+            context.Args["canary"] = s_expected;
+            context.Args["input"] = "x y z";
             return Task.CompletedTask;
         }
 
@@ -580,7 +580,7 @@ public sealed class SKFunctionTests2
 
         // Assert
         Assert.Equal(s_expected, s_actual);
-        Assert.Equal(s_expected, context.Variables["canary"]);
+        Assert.Equal(s_expected, context.Args["canary"]);
         Assert.Equal("x y z", context.Result);
     }
 
@@ -591,8 +591,8 @@ public sealed class SKFunctionTests2
         static Task TestAsync(string input, SKContext context)
         {
             s_actual = s_expected;
-            context.Variables["canary"] = s_expected;
-            context.Variables.Update(input + "x y z");
+            context.Args["canary"] = s_expected;
+            context.Args["input"] = input + "x y z";
             return Task.CompletedTask;
         }
 
@@ -605,7 +605,7 @@ public sealed class SKFunctionTests2
 
         // Assert
         Assert.Equal(s_expected, s_actual);
-        Assert.Equal(s_expected, context.Variables["canary"]);
+        Assert.Equal(s_expected, context.Args["canary"]);
         Assert.Equal("input:x y z", context.Result);
     }
 
@@ -643,7 +643,7 @@ public sealed class SKFunctionTests2
         SKContext result = await function.InvokeAsync(context);
 
         // Assert
-        Assert.Equal("Result: input value", result.Variables.Input);
+        Assert.Equal("Result: input value", result.Args["input"]);
     }
 
     [Fact]
@@ -659,7 +659,7 @@ public sealed class SKFunctionTests2
         SKContext result = await function.InvokeAsync(context);
 
         // Assert
-        Assert.Equal("Result: input value", result.Variables.Input);
+        Assert.Equal("Result: input value", result.Args["input"]);
     }
 
     [Fact]
@@ -668,7 +668,7 @@ public sealed class SKFunctionTests2
         static string Test(int something, long orother) => "Result: " + (something + orother);
 
         var context = this.MockContext("42");
-        context.Variables.Set("orother", "8");
+        context.Args["orother"] = "8";
 
         // Act
         var function = SKFunction.FromNativeMethod(Method(Test));
@@ -676,7 +676,7 @@ public sealed class SKFunctionTests2
         SKContext result = await function.InvokeAsync(context);
 
         // Assert
-        Assert.Equal("Result: 50", result.Variables.Input);
+        Assert.Equal("Result: 50", result.Args["input"]);
     }
 
     [Fact]
@@ -685,7 +685,7 @@ public sealed class SKFunctionTests2
         static string Test(string other) => "Result: " + other;
 
         var context = this.MockContext("input value");
-        context.Variables.Set("other", "other value");
+        context.Args["other"] = "other value";
 
         // Act
         var function = SKFunction.FromNativeMethod(Method(Test));
@@ -693,7 +693,7 @@ public sealed class SKFunctionTests2
         SKContext result = await function.InvokeAsync(context);
 
         // Assert
-        Assert.Equal("Result: other value", result.Variables.Input);
+        Assert.Equal("Result: other value", result.Args["input"]);
     }
 
     [Fact]
@@ -702,7 +702,7 @@ public sealed class SKFunctionTests2
         static string Test([SKName("input"), Description("description")] string other) => "Result: " + other;
 
         var context = this.MockContext("input value");
-        context.Variables.Set("other", "other value");
+        context.Args["other"] = "other value";
 
         // Act
         var function = SKFunction.FromNativeMethod(Method(Test));
@@ -710,7 +710,7 @@ public sealed class SKFunctionTests2
         SKContext result = await function.InvokeAsync(context);
 
         // Assert
-        Assert.Equal("Result: input value", result.Variables.Input);
+        Assert.Equal("Result: input value", result.Args["input"]);
     }
 
     [Fact]
@@ -726,7 +726,7 @@ public sealed class SKFunctionTests2
         SKContext result = await function.InvokeAsync(context);
 
         // Assert
-        Assert.Equal("Result: True", result.Variables.Input);
+        Assert.Equal("Result: True", result.Args["input"]);
     }
 
     [Fact]
@@ -736,12 +736,12 @@ public sealed class SKFunctionTests2
             $"{a} {b} {c} {d} {e:R} {f}";
 
         var context = this.MockContext("");
-        context.Variables.Set("a", "1");
-        context.Variables.Set("b", "-2");
-        context.Variables.Set("c", "1234");
-        context.Variables.Set("d", "7e08cc00-1d71-4558-81ed-69929499dea1");
-        context.Variables.Set("e", "Thu, 25 May 2023 20:17:30 GMT");
-        context.Variables.Set("f", "Monday");
+        context.Args["a"] = "1";
+        context.Args["b"] = "-2";
+        context.Args["c"] = "1234";
+        context.Args["d"] = "7e08cc00-1d71-4558-81ed-69929499dea1";
+        context.Args["e"] = "Thu, 25 May 2023 20:17:30 GMT";
+        context.Args["f"] = "Monday";
 
         // Act
         var function = SKFunction.FromNativeMethod(Method(Test));
@@ -749,7 +749,7 @@ public sealed class SKFunctionTests2
         SKContext result = await function.InvokeAsync(context);
 
         // Assert
-        Assert.Equal("1 -2 1234 7e08cc00-1d71-4558-81ed-69929499dea1 Thu, 25 May 2023 20:17:30 GMT Monday", result.Variables.Input);
+        Assert.Equal("1 -2 1234 7e08cc00-1d71-4558-81ed-69929499dea1 Thu, 25 May 2023 20:17:30 GMT Monday", result.Args["input"]);
     }
 
     [Fact]
@@ -758,7 +758,7 @@ public sealed class SKFunctionTests2
         static int Test(MyCustomType mct) => mct.Value * 2;
 
         var context = this.MockContext("");
-        context.Variables.Set("mct", "42");
+        context.Args["mct"] = "42";
 
         // Act
         var function = SKFunction.FromNativeMethod(Method(Test));
@@ -766,7 +766,7 @@ public sealed class SKFunctionTests2
         SKContext result = await function.InvokeAsync(context);
 
         // Assert
-        Assert.Equal("84", result.Variables.Input);
+        Assert.Equal("84", result.Args["input"]);
     }
 
     [TypeConverter(typeof(MyCustomTypeConverter))]
@@ -794,7 +794,7 @@ public sealed class SKFunctionTests2
         static async Task AssertResult(Delegate d, SKContext context, string expected)
         {
             context = await SKFunction.FromNativeFunction(d, functionName: "Test")!.InvokeAsync(context);
-            Assert.Equal(expected, context.Variables.Input);
+            Assert.Equal(expected, context.Args["input"]);
         }
 
         // Act/Assert
@@ -816,7 +816,7 @@ public sealed class SKFunctionTests2
         await AssertResult((TimeSpan input) => input * 2, context, "65536.00:00:00");
         await AssertResult((TimeSpan? input) => (int?)null, context, "");
 
-        context.Variables.Update("http://example.com/semantic");
+        context.Args["input"] = "http://example.com/semantic";
         await AssertResult((Uri input) => new Uri(input, "kernel"), context, "http://example.com/kernel");
     }
 
@@ -830,22 +830,22 @@ public sealed class SKFunctionTests2
         // Act/Assert
 
         context.Culture = new CultureInfo("fr-FR");
-        context.Variables.Update("12,34"); // tries first to parse with the specified culture
+        context.Args["input"] = "12,34"; // tries first to parse with the specified culture
         context = await func.InvokeAsync(context);
-        Assert.Equal("24,68", context.Variables.Input);
+        Assert.Equal("24,68", context.Args["input"]);
 
         context.Culture = new CultureInfo("fr-FR");
-        context.Variables.Update("12.34"); // falls back to invariant culture
+        context.Args["input"] = "12.34"; // falls back to invariant culture
         context = await func.InvokeAsync(context);
-        Assert.Equal("24,68", context.Variables.Input);
+        Assert.Equal("24,68", context.Args["input"]);
 
         context.Culture = new CultureInfo("en-US");
-        context.Variables.Update("12.34"); // works with current culture
+        context.Args["input"] = "12.34"; // works with current culture
         context = await func.InvokeAsync(context);
-        Assert.Equal("24.68", context.Variables.Input);
+        Assert.Equal("24.68", context.Args["input"]);
 
         context.Culture = new CultureInfo("en-US");
-        context.Variables.Update("12,34"); // not parsable with current or invariant culture
+        context.Args["input"] = "12,34"; // not parsable with current or invariant culture
         await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => func.InvokeAsync(context));
     }
 
@@ -855,7 +855,7 @@ public sealed class SKFunctionTests2
         static string Test(Guid g) => g.ToString();
 
         var context = this.MockContext("");
-        context.Variables.Set("g", "7e08cc00-1d71-4558-81ed-69929499dxyz");
+        context.Args["g"] = "7e08cc00-1d71-4558-81ed-69929499dxyz";
 
         // Act
         var function = SKFunction.FromNativeMethod(Method(Test));
@@ -864,7 +864,7 @@ public sealed class SKFunctionTests2
         var ex = await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => function.InvokeAsync(context));
 
         //Assert
-        AssertExtensions.AssertIsArgumentOutOfRange(ex, "g", context.Variables["g"]);
+        AssertExtensions.AssertIsArgumentOutOfRange(ex, "g", context.Args["g"]);
     }
 
     [Fact]

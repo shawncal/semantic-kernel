@@ -95,12 +95,12 @@ public interface IKernel
     /// Run a single synchronous or asynchronous <see cref="ISKFunction"/>.
     /// </summary>
     /// <param name="skFunction">A Semantic Kernel function to run</param>
-    /// <param name="variables">Input to process</param>
+    /// <param name="args">Input to process</param>
     /// <param name="cancellationToken">The <see cref="CancellationToken"/> to monitor for cancellation requests. The default is <see cref="CancellationToken.None"/>.</param>
     /// <returns>Result of the function</returns>
     Task<SKContext> RunAsync(
         ISKFunction skFunction,
-        ContextVariables? variables = null,
+        IDictionary<string, string>? args = null,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -124,11 +124,11 @@ public interface IKernel
     /// <summary>
     /// Run a pipeline composed of synchronous and asynchronous functions.
     /// </summary>
-    /// <param name="variables">Input to process</param>
+    /// <param name="args">Input to process</param>
     /// <param name="pipeline">List of functions</param>
     /// <returns>Result of the function composition</returns>
     Task<SKContext> RunAsync(
-        ContextVariables variables,
+        IDictionary<string, string> args,
         params ISKFunction[] pipeline);
 
     /// <summary>
@@ -156,12 +156,12 @@ public interface IKernel
     /// <summary>
     /// Run a pipeline composed of synchronous and asynchronous functions.
     /// </summary>
-    /// <param name="variables">Input to process</param>
+    /// <param name="args">Input to process</param>
     /// <param name="cancellationToken">The <see cref="CancellationToken"/> to monitor for cancellation requests. The default is <see cref="CancellationToken.None"/>.</param>
     /// <param name="pipeline">List of functions</param>
     /// <returns>Result of the function composition</returns>
     Task<SKContext> RunAsync(
-        ContextVariables variables,
+        IDictionary<string, string> args,
         CancellationToken cancellationToken,
         params ISKFunction[] pipeline);
 

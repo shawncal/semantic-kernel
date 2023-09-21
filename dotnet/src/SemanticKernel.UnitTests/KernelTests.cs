@@ -63,12 +63,12 @@ public class KernelTests
         SKContext result = await kernel.RunAsync(skill["ReadSkillCollectionAsync"]);
 
         // Assert - 3 functions, var name is not case sensitive
-        Assert.Equal("Nice fun", result.Variables["jk.joker"]);
-        Assert.Equal("Nice fun", result.Variables["JK.JOKER"]);
-        Assert.Equal("Just say hello", result.Variables["mySk.sayhello"]);
-        Assert.Equal("Just say hello", result.Variables["mySk.SayHello"]);
-        Assert.Equal("Export info.", result.Variables["mySk.ReadSkillCollectionAsync"]);
-        Assert.Equal("Export info.", result.Variables["mysk.readskillcollectionasync"]);
+        Assert.Equal("Nice fun", result.Args["jk.joker"]);
+        Assert.Equal("Nice fun", result.Args["JK.JOKER"]);
+        Assert.Equal("Just say hello", result.Args["mySk.sayhello"]);
+        Assert.Equal("Just say hello", result.Args["mySk.SayHello"]);
+        Assert.Equal("Export info.", result.Args["mySk.ReadSkillCollectionAsync"]);
+        Assert.Equal("Export info.", result.Args["mysk.readskillcollectionasync"]);
     }
 
     [Fact]
@@ -439,15 +439,15 @@ public class KernelTests
 
         sut.FunctionInvoking += (object? sender, FunctionInvokingEventArgs e) =>
         {
-            e.SKContext.Variables.Update(newInput);
-            e.SKContext.Variables.TryAdd("new", newInput);
+            e.SKContext.Args["input"] = newInput;
+            e.SKContext.Args.TryAdd("new", newInput);
         };
 
         // Act
         var context = await sut.RunAsync(originalInput, semanticFunction);
 
         // Assert
-        Assert.Equal(context.Variables["new"], newInput);
+        Assert.Equal(context.Args["new"], newInput);
     }
 
     [Fact]
@@ -463,14 +463,14 @@ public class KernelTests
 
         sut.FunctionInvoked += (object? sender, FunctionInvokedEventArgs e) =>
         {
-            e.SKContext.Variables.Update(newInput);
+            e.SKContext.Args["input"] = newInput;
         };
 
         // Act
         var context = await sut.RunAsync(originalInput, semanticFunction);
 
         // Assert
-        Assert.Equal(context.Variables.Input, newInput);
+        Assert.Equal(context.Args["input"], newInput);
     }
 
     public class MySkill
@@ -499,7 +499,7 @@ public class KernelTests
 
             foreach (var function in context.Skills.GetFunctionViews())
             {
-                context.Variables[$"{function.SkillName}.{function.Name}"] = function.Description;
+                context.Args[$"{function.SkillName}.{function.Name}"] = function.Description;
             }
 
             return context;

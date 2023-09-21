@@ -86,7 +86,7 @@ public class StepwisePlanner : IStepwisePlanner
         }
 
         Plan planStep = new(this._nativeFunctions["ExecutePlan"]);
-        planStep.Parameters.Set("question", goal);
+        planStep.Parameters["question"] = goal;
 
         planStep.Outputs.Add("stepCount");
         planStep.Outputs.Add("skillCount");
@@ -117,7 +117,7 @@ public class StepwisePlanner : IStepwisePlanner
     {
         if (string.IsNullOrEmpty(question))
         {
-            context.Variables.Update("Question not found.");
+            context.Args["input"] = "Question not found.";
             return context;
         }
 
@@ -152,7 +152,7 @@ public class StepwisePlanner : IStepwisePlanner
             {
                 this._logger?.LogInformation("Final Answer: {FinalAnswer}", step.FinalAnswer);
 
-                context.Variables.Update(step.FinalAnswer);
+                context.Args["input"] = step.FinalAnswer;
 
                 stepsTaken.Add(step);
 
@@ -322,7 +322,7 @@ public class StepwisePlanner : IStepwisePlanner
         }
 
         AddExecutionStatsToContext(stepsTaken, context, this.Config.MaxIterations);
-        context.Variables.Update("Result not found, review 'stepsTaken' to see what happened.");
+        context.Args["input"] = "Result not found, review 'stepsTaken' to see what happened.";
 
         return context;
     }
@@ -336,8 +336,8 @@ public class StepwisePlanner : IStepwisePlanner
 
         var systemContext = this._kernel.CreateNewContext();
 
-        systemContext.Variables.Set("suffix", this.Config.Suffix);
-        systemContext.Variables.Set("functionDescriptions", userManual);
+        systemContext.Args["suffix"] = this.Config.Suffix;
+        systemContext.Args["functionDescriptions"] = userManual;
         string systemMessage = await this.GetSystemMessageAsync(systemContext).ConfigureAwait(false);
 
         chatHistory.AddSystemMessage(systemMessage);
@@ -367,7 +367,7 @@ public class StepwisePlanner : IStepwisePlanner
     private async Task<string> GetUserManualAsync(SKContext context)
     {
         var descriptions = await this.GetFunctionDescriptionsAsync().ConfigureAwait(false);
-        context.Variables.Set("functionDescriptions", descriptions);
+        context.Args["functionDescriptions"] = descriptions;
         return await this._promptRenderer.RenderAsync(this._manualTemplate, context).ConfigureAwait(false);
     }
 
@@ -599,7 +599,7 @@ public class StepwisePlanner : IStepwisePlanner
         {
             foreach (var kvp in actionVariables)
             {
-                actionContext.Variables.Set(kvp.Key, kvp.Value);
+                actionContext.Args[kvp.Key] = kvp.Value;
             }
         }
 
@@ -633,9 +633,9 @@ public class StepwisePlanner : IStepwisePlanner
 
     private static void AddExecutionStatsToContext(List<SystemStep> stepsTaken, SKContext context, int iterations)
     {
-        context.Variables.Set("stepCount", stepsTaken.Count.ToString(CultureInfo.InvariantCulture));
-        context.Variables.Set("stepsTaken", JsonSerializer.Serialize(stepsTaken));
-        context.Variables.Set("iterations", iterations.ToString(CultureInfo.InvariantCulture));
+        context.Args["stepCount"] = stepsTaken.Count.ToString(CultureInfo.InvariantCulture);
+        context.Args["stepsTaken"] = JsonSerializer.Serialize(stepsTaken);
+        context.Args["iterations"] = iterations.ToString(CultureInfo.InvariantCulture);
 
         Dictionary<string, int> actionCounts = new();
         foreach (var step in stepsTaken)
@@ -651,7 +651,7 @@ public class StepwisePlanner : IStepwisePlanner
 
         var skillCallCountStr = actionCounts.Values.Sum().ToString(CultureInfo.InvariantCulture);
 
-        context.Variables.Set("skillCount", $"{skillCallCountStr} ({skillCallListWithCounts})");
+        context.Args["skillCount"] = $"{skillCallCountStr} ({skillCallListWithCounts})";
     }
 
     private static string ToManualString(FunctionView function)

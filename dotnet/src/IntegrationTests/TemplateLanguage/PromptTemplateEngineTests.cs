@@ -35,8 +35,8 @@ public sealed class PromptTemplateEngineTests : IDisposable
 
         var kernel = Kernel.Builder.Build();
         var context = kernel.CreateNewContext();
-        context.Variables["input"] = Input;
-        context.Variables["winner"] = Winner;
+        context.Args["input"] = Input;
+        context.Args["winner"] = Winner;
 
         // Act
         var result = await this._target.RenderAsync(Template, context);
@@ -73,7 +73,7 @@ public sealed class PromptTemplateEngineTests : IDisposable
         var kernel = Kernel.Builder.Build();
         kernel.ImportSkill(new MySkill(), "my");
         var context = kernel.CreateNewContext();
-        context.Variables["call"] = "123";
+        context.Args["call"] = "123";
 
         // Act
         var result = await this._target.RenderAsync(Template, context);
@@ -140,7 +140,7 @@ public sealed class PromptTemplateEngineTests : IDisposable
         var kernel = Kernel.Builder.Build();
         kernel.ImportSkill(new MySkill(), "my");
         var context = kernel.CreateNewContext();
-        context.Variables["birthdate"] = "1981-08-20T00:00:00";
+        context.Args["birthdate"] = "1981-08-20T00:00:00";
 
         // Act
         var result = await this._target.RenderAsync(template, context);

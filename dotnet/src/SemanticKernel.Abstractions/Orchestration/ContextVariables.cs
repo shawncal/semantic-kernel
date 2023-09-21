@@ -27,18 +27,12 @@ public sealed class ContextVariables : Dictionary<string, string>
     }
 
     /// <summary>
-    /// Create a copy of the current instance with a copy of the internal data
+    /// Constructor for context variables.
     /// </summary>
-    /// <returns>Copy of the current instance</returns>
-    public ContextVariables Clone()
+    /// <param name="values">A dictionary of key, value pairs with which to initiailze the ContextVariables.</param>
+    public ContextVariables(IDictionary<string, string> values)
+        : base(values, StringComparer.OrdinalIgnoreCase)
     {
-        var clone = new ContextVariables();
-        foreach (KeyValuePair<string, string> x in this)
-        {
-            clone.Set(x.Key, x.Value);
-        }
-
-        return clone;
     }
 
     /// <summary>Gets the main input string.</summary>
