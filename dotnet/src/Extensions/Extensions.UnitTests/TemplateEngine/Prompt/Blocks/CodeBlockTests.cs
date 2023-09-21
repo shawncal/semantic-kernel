@@ -285,7 +285,7 @@ public class CodeBlockTests
         const string Func = "funcName";
         const string Value = "value";
 
-        var context = new SKContext(this._kernel.Object, variables: null, skills: this._skills.Object);
+        var context = new SKContext(this._kernel.Object, skills: this._skills.Object);
         var funcId = new FunctionIdBlock(Func);
         var valBlock = new ValBlock($"'{Value}'");
 
@@ -320,10 +320,12 @@ public class CodeBlockTests
         const string Value = "value";
         const string FooValue = "bar";
         const string BobValue = "bob's value";
-        var variables = new ContextVariables();
-        variables.Set("bob", BobValue);
-        variables.Set("input", Value);
-        var context = new SKContext(this._kernel.Object, variables: variables, skills: this._skills.Object);
+        var args = new Dictionary<string, string>
+        {
+            ["bob"] = BobValue,
+            ["input"] = Value,
+        };
+        var context = new SKContext(this._kernel.Object, args: args, skills: this._skills.Object);
         var funcId = new FunctionIdBlock(Func);
         var namedArgBlock1 = new NamedArgBlock($"foo='{FooValue}'");
         var namedArgBlock2 = new NamedArgBlock("baz=$bob");

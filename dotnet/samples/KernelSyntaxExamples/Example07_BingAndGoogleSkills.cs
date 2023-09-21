@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.Connectors.AI.OpenAI;
@@ -140,9 +141,10 @@ Answer: ";
 
         var oracle = kernel.CreateSemanticFunction(SemanticFunction, requestSettings: new OpenAIRequestSettings() { MaxTokens = 150, Temperature = 0, TopP = 1 });
 
-        var answer = await kernel.RunAsync(oracle, new(questions)
+        var answer = await kernel.RunAsync(oracle, new Dictionary<string, string>
         {
-            ["externalInformation"] = string.Empty
+            ["externalInformation"] = string.Empty,
+            ["input"] = questions
         });
 
         // If the answer contains commands, execute them using the prompt renderer.
@@ -157,10 +159,11 @@ Answer: ";
             Console.WriteLine(information);
 
             // Run the semantic function again, now including information from Bing
-            answer = await kernel.RunAsync(oracle, new(questions)
+            answer = await kernel.RunAsync(oracle, new Dictionary<string, string>
             {
                 // The rendered prompt contains the information retrieved from search engines
-                ["externalInformation"] = information
+                ["externalInformation"] = information,
+                ["input"] = questions
             });
         }
         else

@@ -133,7 +133,7 @@ public sealed class PlanTests : IDisposable
 
         subPlan.AddSteps(emailSkill["WritePoem"], emailSkill["WritePoem"], emailSkill["WritePoem"]);
         plan.AddSteps(subPlan, emailSkill["SendEmail"]);
-        plan.State.Set("email_address", "something@email.com");
+        plan.State["email_address"] = "something@email.com";
 
         // Act
         var result = await target.RunAsync("PlanInput", plan);
@@ -164,7 +164,7 @@ public sealed class PlanTests : IDisposable
 
         var plan = new Plan(goal);
         plan.AddSteps(sendEmailPlan);
-        plan.State.Set("TheEmailFromState", email); // manually prepare the state
+        plan.State["TheEmailFromState"] = email; // manually prepare the state
 
         // Act
         var result = await target.StepAsync(input, plan);
@@ -197,7 +197,7 @@ public sealed class PlanTests : IDisposable
 
         var plan = new Plan(goal);
         plan.AddSteps(sendEmailPlan);
-        plan.State.Set("email_address", email); // manually prepare the state
+        plan.State["email_address"] = email; // manually prepare the state
 
         // Act
         var result = await target.StepAsync(input, plan);
@@ -230,7 +230,7 @@ public sealed class PlanTests : IDisposable
 
         var plan = new Plan(goal);
         plan.AddSteps(sendEmailPlan);
-        plan.State.Set("TheEmailFromState", email); // manually prepare the state
+        plan.State["TheEmailFromState"] = email; // manually prepare the state
 
         // Act
         var result = await target.StepAsync(input, plan);
@@ -313,7 +313,7 @@ public sealed class PlanTests : IDisposable
         Assert.False(result.HasNextStep);
         Assert.Equal(goal, plan.Description);
         Assert.Contains(expectedBody, plan.State.ToString(), StringComparison.OrdinalIgnoreCase);
-        Assert.True(expectedBody.Length < plan.State.ToString().Length);
+        Assert.True(expectedBody.Length < plan.State.ToString()?.Length);
     }
 
     [Theory]
