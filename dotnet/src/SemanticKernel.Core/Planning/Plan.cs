@@ -344,12 +344,16 @@ public sealed class Plan : IPlan
         {
             AddArgsToContext(this.State, context);
 
-            var result = await this.Function
+            result = await this.Function
                 .WithInstrumentation(context.LoggerFactory)
                 .InvokeAsync(context, requestSettings, cancellationToken)
                 .ConfigureAwait(false);
 
-            context.Args["input"] = result.Result;
+            string? resultStr = result.GetValue<string>();
+            if (resultStr != null)
+            {
+                context.Args["input"] = resultStr;
+            }
         }
         else
         {

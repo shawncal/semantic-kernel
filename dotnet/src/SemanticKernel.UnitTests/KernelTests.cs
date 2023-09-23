@@ -421,10 +421,10 @@ public class KernelTests
         };
 
         // Act
-        await sut.RunAsync(originalInput, semanticFunction);
+        var result = await sut.RunAsync(originalInput, semanticFunction);
 
         // Assert
-        Assert.Equal(context.Args["new"], newInput);
+        Assert.Equal(result.FunctionResults.FirstOrDefault()?.Context.Args["new"], newInput);
     }
 
     [Fact]

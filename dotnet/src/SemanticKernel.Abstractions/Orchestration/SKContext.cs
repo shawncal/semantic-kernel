@@ -87,42 +87,9 @@ public sealed class SKContext
 
         this._originalKernel = kernel;
         this.Variables = args != null ? new(args) : new();
-        this.Functions = functions ?? NullReadOnlyFunctionCollection.Instance;
+        this.Functions = functions ?? kernel.Functions;
         this.LoggerFactory = kernel.LoggerFactory;
         this._culture = CultureInfo.CurrentCulture;
-    }
-
-    /// <summary>
-    /// Constructor for the context.
-    /// </summary>
-    /// <param name="kernel">Kernel instance parameter</param>
-    /// <param name="args">Function arguments to include in context.</param>
-    public SKContext(
-        IKernel kernel,
-        ContextVariables? variables = null) : this(kernel, variables, kernel.Skills)
-        : this(kernel, args, kernel.Functions)
-    {
-    }
-
-    /// <summary>
-    /// Constructor for the context.
-    /// </summary>
-    /// <param name="kernel">Kernel instance parameter</param>
-    /// <param name="functions">Functions to include in context.</param>
-    public SKContext(
-        IKernel kernel,
-        IReadOnlyFunctionCollection? functions = null)
-        : this(kernel, null, functions)
-    {
-    }
-
-    /// <summary>
-    /// Constructor for the context.
-    /// </summary>
-    /// <param name="kernel">Kernel instance parameter</param>
-    public SKContext(IKernel kernel) : this(kernel, null, kernel.Skills)
-        : this(kernel, null, kernel.Functions)
-    {
     }
 
     /// <summary>
@@ -171,7 +138,6 @@ public sealed class SKContext
                 var view = functions.GetFunctionViews();
                 display += $", Functions = {view.Count}";
             }
-
 
             display += $", Culture = {this.Culture.EnglishName}";
 

@@ -183,7 +183,7 @@ public sealed class Kernel : IKernel, IDisposable
         => this.RunAsync(new Dictionary<string, string>() { ["input"] = input }, pipeline);
 
     /// <inheritdoc/>
-    public Task<KernelResult> RunAsync(ContextVariables variables, params ISKFunction[] pipeline)
+    public Task<KernelResult> RunAsync(IDictionary<string, string> args, params ISKFunction[] pipeline)
         => this.RunAsync(args, CancellationToken.None, pipeline);
 
     /// <inheritdoc/>

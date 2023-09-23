@@ -687,7 +687,7 @@ public sealed class SKFunctionTests2
         FunctionResult result = await function.InvokeAsync(context);
 
         // Assert
-        Assert.Equal("Result: input value", result.Args["input"];
+        Assert.Equal("Result: input value", result.Context.Args["input"]);
     }
 
     [Fact]
@@ -722,7 +722,7 @@ public sealed class SKFunctionTests2
         FunctionResult result = await function.InvokeAsync(context);
 
         // Assert
-        Assert.Equal("Result: 50", result.Args["input"];
+        Assert.Equal("Result: 50", result.Context.Args["input"]);
     }
 
     [Fact]
@@ -758,7 +758,7 @@ public sealed class SKFunctionTests2
         FunctionResult result = await function.InvokeAsync(context);
 
         // Assert
-        Assert.Equal("Result: input value", result.Context.Args["input"];
+        Assert.Equal("Result: input value", result.Context.Args["input"]);
     }
 
     [Fact]
@@ -775,7 +775,7 @@ public sealed class SKFunctionTests2
         FunctionResult result = await function.InvokeAsync(context);
 
         // Assert
-        Assert.Equal("Result: True", result.Context.Args["input"];
+        Assert.Equal("Result: True", result.Context.Args["input"]);
     }
 
     [Fact]
@@ -847,7 +847,7 @@ public sealed class SKFunctionTests2
             var result = await SKFunction.FromNativeFunction(d, functionName: "Test")!.InvokeAsync(context);
             context = result.Context;
 
-            Assert.Equal(expected, context.Args["input"]));
+            Assert.Equal(expected, context.Args["input"]);
         }
 
         // Act/Assert
@@ -885,17 +885,17 @@ public sealed class SKFunctionTests2
 
         context.Culture = new CultureInfo("fr-FR");
         context.Args["input"] = "12,34"; // tries first to parse with the specified culture
-        context = await func.InvokeAsync(context);
+        result = await func.InvokeAsync(context);
         Assert.Equal("24,68", result.Context.Args["input"]);
 
         context.Culture = new CultureInfo("fr-FR");
         context.Args["input"] = "12.34"; // falls back to invariant culture
-        context = await func.InvokeAsync(context);
+        result = await func.InvokeAsync(context);
         Assert.Equal("24,68", result.Context.Args["input"]);
 
         context.Culture = new CultureInfo("en-US");
         context.Args["input"] = "12.34"; // works with current culture
-        context = await func.InvokeAsync(context);
+        result = await func.InvokeAsync(context);
         Assert.Equal("24.68", result.Context.Args["input"]);
 
         context.Culture = new CultureInfo("en-US");

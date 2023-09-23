@@ -530,9 +530,7 @@ public class StepwisePlanner : IStepwisePlanner
         try
         {
             ISKFunction function = this.GetFunction(targetFunction);
-
-            var vars = this.CreateActionContextVariables(actionVariables);
-            var kernelResult = await this._kernel.RunAsync(function, vars, cancellationToken).ConfigureAwait(false);
+            var kernelResult = await this._kernel.RunAsync(function, actionVariables, cancellationToken).ConfigureAwait(false);
             var result = kernelResult.GetValue<string>();
 
             this._logger?.LogTrace("Invoked {FunctionName}. Result: {Result}", targetFunction.Name, result);
@@ -586,7 +584,6 @@ public class StepwisePlanner : IStepwisePlanner
         return this.Config.GetAvailableFunctionsAsync(this.Config, null, cancellationToken);
     }
 
-
     #endregion execution helpers
 
     private static PromptTemplateConfig LoadPromptConfigFromResource()
@@ -633,7 +630,6 @@ public class StepwisePlanner : IStepwisePlanner
         var functionCallCountStr = actionCounts.Values.Sum().ToString(CultureInfo.InvariantCulture);
 
         context.Args["functionCount"] = $"{functionCallCountStr} ({functionCallListWithCounts})";
-
     }
 
     private static string ToManualString(FunctionView function)

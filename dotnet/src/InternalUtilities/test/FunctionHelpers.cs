@@ -16,7 +16,7 @@ internal static class FunctionHelpers
     public static Task<KernelResult> CallViaKernelAsync(
         object pluginInstance,
         string methodName,
-        params (string Name, string Value)[] args)
+        params (string Name, object Value)[] args)
     {
         var kernel = Kernel.Builder.Build();
 
