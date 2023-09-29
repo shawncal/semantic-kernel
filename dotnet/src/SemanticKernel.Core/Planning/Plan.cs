@@ -340,7 +340,7 @@ public sealed class Plan : IPlan
             // Then filter the variables to only those needed for the next step.
             // This is done to prevent the function from having access to variables that it shouldn't.
             AddArgsToContext(this.State, context);
-            var functionVariables = this.GetNextStepVariables(context.Variables, this);
+            var functionVariables = this.GetNextStepArgs(context.Variables, this);
             var functionContext = new SKContext(context.Kernel, functionVariables, context.Functions);
 
             // Execute the step

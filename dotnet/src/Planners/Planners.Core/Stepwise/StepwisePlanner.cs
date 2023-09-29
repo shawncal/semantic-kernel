@@ -514,7 +514,7 @@ public class StepwisePlanner : IStepwisePlanner
         return result;
     }
 
-    private async Task<string?> InvokeActionAsync(string actionName, Dictionary<string, string> actionVariables, CancellationToken cancellationToken)
+    private async Task<string?> InvokeActionAsync(string actionName, Dictionary<string, string> args, CancellationToken cancellationToken)
     {
         FunctionUtils.SplitPluginFunctionName(actionName, out var pluginName, out var functionName);
         if (string.IsNullOrEmpty(functionName))
@@ -534,8 +534,7 @@ public class StepwisePlanner : IStepwisePlanner
 
         try
         {
-            var vars = this.CreateActionContextVariables(actionVariables);
-            var kernelResult = await this._kernel.RunAsync(targetFunction, vars, cancellationToken).ConfigureAwait(false);
+            var kernelResult = await this._kernel.RunAsync(targetFunction, args, cancellationToken).ConfigureAwait(false);
             var result = kernelResult.GetValue<string>();
 
             this._logger?.LogTrace("Invoked {FunctionName}. Result: {Result}", targetFunction.Name, result);
