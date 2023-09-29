@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
@@ -71,11 +72,14 @@ public sealed class WebPluginTests : IDisposable
         var plugin = new WebFileDownloadPlugin(pluginLogger);
         var downloadFunctions = kernel.ImportFunctions(plugin, "WebFileDownload");
         string fileWhereToSaveWebPage = Path.GetTempFileName();
-        var contextVariables = new ContextVariables("https://www.microsoft.com");
-        contextVariables.Set(WebFileDownloadPlugin.FilePathParamName, fileWhereToSaveWebPage);
+        var args = new Dictionary<string, string>
+        {
+            ["input"] = "https://www.microsoft.com",
+            [WebFileDownloadPlugin.FilePathParamName] = fileWhereToSaveWebPage
+        };
 
         // Act
-        await kernel.RunAsync(contextVariables, downloadFunctions["DownloadToFile"]);
+        await kernel.RunAsync(args, downloadFunctions["DownloadToFile"]);
 
         // Assert
         var fileInfo = new FileInfo(fileWhereToSaveWebPage);

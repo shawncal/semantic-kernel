@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
 using System;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.SemanticKernel;
@@ -32,14 +33,16 @@ public class PluginTests
             new Uri(pluginEndpoint),
             new OpenApiFunctionExecutionParameters(httpClient));
 
-        var contextVariables = new ContextVariables();
-        contextVariables["q"] = query;
-        contextVariables["size"] = size.ToString(System.Globalization.CultureInfo.InvariantCulture);
-        contextVariables["budget"] = budget.ToString(System.Globalization.CultureInfo.InvariantCulture);
-        contextVariables["countryCode"] = countryCode;
+        var args = new Dictionary<string, string>()
+        {
+            ["q"] = query,
+            ["size"] = size.ToString(System.Globalization.CultureInfo.InvariantCulture),
+            ["budget"] = budget.ToString(System.Globalization.CultureInfo.InvariantCulture),
+            ["countryCode"] = countryCode
+        };
 
         // Act
-        await plugin[functionName].InvokeAsync(new SKContext(kernel, contextVariables));
+        await plugin[functionName].InvokeAsync(new SKContext(kernel, args));
     }
 
     [Theory]
@@ -64,11 +67,13 @@ public class PluginTests
             new Uri(pluginEndpoint),
             new OpenApiFunctionExecutionParameters(httpClient) { IgnoreNonCompliantErrors = true });
 
-        var contextVariables = new ContextVariables();
-        contextVariables["payload"] = payload;
+        var args = new Dictionary<string, string>
+        {
+            ["payload"] = payload
+        };
 
         // Act
-        await plugin[functionName].InvokeAsync(new SKContext(kernel, contextVariables));
+        await plugin[functionName].InvokeAsync(new SKContext(kernel, args));
     }
 
     [Theory]
@@ -95,11 +100,10 @@ public class PluginTests
                 stream,
                 new OpenApiFunctionExecutionParameters(httpClient) { IgnoreNonCompliantErrors = true });
 
-            var contextVariables = new ContextVariables();
-            contextVariables["payload"] = payload;
+            var args = new Dictionary<string, string> { ["paymload"] = payload };
 
             // Act
-            await plugin[functionName].InvokeAsync(new SKContext(kernel, contextVariables));
+            await plugin[functionName].InvokeAsync(new SKContext(kernel, args));
         }
     }
 
@@ -125,8 +129,10 @@ public class PluginTests
             pluginFilePath,
             new OpenApiFunctionExecutionParameters(httpClient) { IgnoreNonCompliantErrors = true });
 
-        var contextVariables = new ContextVariables();
-        contextVariables["payload"] = payload;
+        var contextVariables = new Dictionary<string, string>
+        {
+            ["payload"] = payload
+        };
 
         // Act
         await plugin[functionName].InvokeAsync(new SKContext(kernel, contextVariables));
