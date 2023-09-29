@@ -32,9 +32,9 @@ public sealed class KernelSemanticFunctionExtensionsTests : IDisposable
                 .WithLoggerFactory(this._logger);
         IKernel target = builder.Build();
 
-        var emailPlugin = target.ImportPlugin(new EmailPluginFake());
+        var emailFunctions = target.ImportFunctions(new EmailPluginFake());
 
-        var prompt = "Hey {{_GLOBAL_FUNCTIONS_.GetEmailAddress}}";
+        var prompt = $"Hey {{{{{FunctionCollection.GlobalFunctionsPluginName}.GetEmailAddress}}}}";
 
         // Act
         KernelResult actual = await target.InvokeSemanticFunctionAsync(prompt, requestSettings: new OpenAIRequestSettings() { MaxTokens = 150 });
@@ -51,9 +51,9 @@ public sealed class KernelSemanticFunctionExtensionsTests : IDisposable
                 .WithLoggerFactory(this._logger);
         IKernel target = builder.Build();
 
-        var emailPlugin = target.ImportPlugin(new EmailPluginFake());
+        var emailFunctions = target.ImportFunctions(new EmailPluginFake());
 
-        var prompt = "Hey {{_GLOBAL_FUNCTIONS_.GetEmailAddress \"a person\"}}";
+        var prompt = $"Hey {{{{{FunctionCollection.GlobalFunctionsPluginName}.GetEmailAddress \"a person\"}}}}";
 
         // Act
         KernelResult actual = await target.InvokeSemanticFunctionAsync(prompt, requestSettings: new OpenAIRequestSettings() { MaxTokens = 150 });

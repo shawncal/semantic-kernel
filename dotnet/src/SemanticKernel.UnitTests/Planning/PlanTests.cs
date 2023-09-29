@@ -480,7 +480,8 @@ public sealed class PlanTests
         mockFunction.Setup(x => x.InvokeAsync(It.IsAny<SKContext>(), null, It.IsAny<CancellationToken>()))
             .Callback<SKContext, AIRequestSettings, CancellationToken>((c, s, ct) =>
                 returnContext.Variables.Update("Here is a poem about " + c.Variables.Input))
-            .Returns(() => Task.FromResult(returnContext));
+            .Returns(() => Task.FromResult(new FunctionResult("functionName", "pluginName", returnContext, returnContext.Result)));
+        mockFunction.Setup(x => x.Describe()).Returns(() => new FunctionView("functionName", "pluginName"));
 
         var plan = new Plan(mockFunction.Object);
         plan.State["input"] = "Cleopatra";
@@ -546,6 +547,7 @@ public sealed class PlanTests
                 returnContext.Args["input"] = $"Here is a {t} about " + c.Args["input"];
             })
             .Returns(() => Task.FromResult(new FunctionResult("functionName", "pluginName", returnContext, returnContext.Result)));
+        mockFunction.Setup(x => x.Describe()).Returns(() => new FunctionView("functionName", "pluginName"));
 
         var plan = new Plan(mockFunction.Object);
         plan.State["input"] = "Cleopatra";
@@ -763,6 +765,10 @@ Previously:Outline section #1 of 3: Here is a 3 chapter outline about NovelOutli
         // Assert
         Assert.Equal(expected, result.Context.Result);
         Assert.Equal(expected, result.GetValue<string>());
+        Assert.True(result.TryGetMetadataValue<string>("RESULT__CHAPTER_1", out var chapter1));
+        Assert.True(result.TryGetMetadataValue<string>("RESULT__CHAPTER_2", out var chapter2));
+        Assert.True(result.TryGetMetadataValue<string>("CHAPTER_3", out var chapter3));
+        Assert.False(result.TryGetMetadataValue<string>("CHAPTER_3_SYNOPSIS", out var chapter3Synopsis));
     }
 
     [Fact]
