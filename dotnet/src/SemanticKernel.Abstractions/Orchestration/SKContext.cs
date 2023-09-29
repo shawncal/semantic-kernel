@@ -19,6 +19,7 @@ public sealed class SKContext
     /// Print the processed input, aka the current data after any processing occurred.
     /// </summary>
     /// <returns>Processed input, aka result</returns>
+    [Obsolete("Use KernelResult class. Results no longer stored in context. This will be removed in a future release.")]
     public string Result => this.Variables.ToString();
 
     /// <summary>
@@ -40,12 +41,15 @@ public sealed class SKContext
     /// <summary>
     /// User-specified function arguments (legacy - use Args)
     /// </summary>
+    [Obsolete("Use Args property instead. This will be removed in a future release.")]
     public ContextVariables Variables { get; }
 
     /// <summary>
     /// User-specified function arguments
     /// </summary>
+#pragma warning disable CS0618 // Type or member is obsolete
     public IDictionary<string, string> Args => this.Variables;
+#pragma warning restore CS0618 // Type or member is obsolete
 
     /// <summary>
     /// Read only functions collection
@@ -86,19 +90,12 @@ public sealed class SKContext
         Verify.NotNull(kernel, nameof(kernel));
 
         this._originalKernel = kernel;
+#pragma warning disable CS0618 // Type or member is obsolete
         this.Variables = args != null ? new(args) : new();
+#pragma warning restore CS0618 // Type or member is obsolete
         this.Functions = functions ?? kernel.Functions;
         this.LoggerFactory = kernel.LoggerFactory;
         this._culture = CultureInfo.CurrentCulture;
-    }
-
-    /// <summary>
-    /// Print the processed input, aka the current data after any processing occurred.
-    /// </summary>
-    /// <returns>Processed input, aka result.</returns>
-    public override string ToString()
-    {
-        return this.Result;
     }
 
     /// <summary>
@@ -110,7 +107,7 @@ public sealed class SKContext
     {
         return new SKContext(
             kernel: this._originalKernel,
-            args: this.Variables)
+            args: this.Args)
         {
             Culture = this.Culture,
         };

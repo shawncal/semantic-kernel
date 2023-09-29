@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -87,7 +88,10 @@ public sealed class PlanSerializationTests
 
         var returnContext = new SKContext(
             this._kernel.Object,
-            new ContextVariables(stepOutput),
+            new Dictionary<string, string>
+            {
+                ["input"] = stepOutput
+            },
             functions.Object
         );
 
@@ -123,7 +127,10 @@ public sealed class PlanSerializationTests
 
         var returnContext = new SKContext(
             this._kernel.Object,
-            new ContextVariables(stepOutput),
+            new Dictionary<string, string>
+            {
+                ["input"] = stepOutput
+            },
             functions.Object
         );
 
@@ -159,7 +166,7 @@ public sealed class PlanSerializationTests
 
         var returnContext = new SKContext(
             this._kernel.Object,
-            new ContextVariables(stepOutput),
+            new Dictionary<string, string> { ["input"] = stepOutput },
             functions.Object
         );
 
@@ -195,7 +202,7 @@ public sealed class PlanSerializationTests
 
         var returnContext = new SKContext(
             this._kernel.Object,
-            new ContextVariables(stepOutput),
+            new Dictionary<string, string> { ["input"] = stepOutput },
             functions.Object
         );
 
@@ -230,7 +237,7 @@ public sealed class PlanSerializationTests
 
         var returnContext = new SKContext(
             this._kernel.Object,
-            new ContextVariables(stepOutput),
+            new Dictionary<string, string> { ["input"] = stepOutput },
             functions.Object
         );
 
@@ -265,7 +272,7 @@ public sealed class PlanSerializationTests
 
         var returnContext = new SKContext(
             this._kernel.Object,
-            new ContextVariables(stepOutput),
+            new Dictionary<string, string> { ["input"] = stepOutput },
             functions.Object
         );
 
@@ -322,7 +329,7 @@ public sealed class PlanSerializationTests
 
         var returnContext = new SKContext(
             this._kernel.Object,
-            new ContextVariables(stepOutput),
+            new Dictionary<string, string> { ["input"] = stepOutput },
             functions.Object
         );
 
@@ -344,9 +351,12 @@ public sealed class PlanSerializationTests
 
         plan.AddSteps(mockFunction.Object, mockFunction.Object);
 
-        var cv = new ContextVariables(planInput);
-        cv.Set("variables", "foo");
-        plan = await kernel.Object.StepAsync(cv, plan);
+        var args = new Dictionary<string, string>
+        {
+            ["input"] = planInput,
+            ["variables"] = "foo"
+        };
+        plan = await kernel.Object.StepAsync(args, plan);
 
         // Act
         var serializedPlan1 = plan.ToJson();
@@ -357,9 +367,9 @@ public sealed class PlanSerializationTests
         Assert.Contains("\"next_step_index\":1", serializedPlan1, StringComparison.OrdinalIgnoreCase);
 
         // Act
-        cv.Set("variables", "bar");
-        cv.Update(string.Empty);
-        plan = await kernel.Object.StepAsync(cv, plan);
+        args["variables"] = "bar";
+        args["input"] = string.Empty;
+        plan = await kernel.Object.StepAsync(args, plan);
 
         // Assert
         Assert.NotNull(plan);
@@ -391,7 +401,7 @@ public sealed class PlanSerializationTests
 
         var returnContext = new SKContext(
             this._kernel.Object,
-            new ContextVariables(stepOutput),
+            new Dictionary<string, string> { ["input"] = stepOutput },
             functions.Object
         );
 
@@ -420,9 +430,12 @@ public sealed class PlanSerializationTests
 
         var serializedPlan = plan.ToJson();
 
-        var cv = new ContextVariables(planInput);
-        cv.Set("variables", "foo");
-        plan = await kernel.Object.StepAsync(cv, plan);
+        var args = new Dictionary<string, string>
+        {
+            ["input"] = planInput,
+            ["variables"] = "foo"
+        };
+        plan = await kernel.Object.StepAsync(args, plan);
 
         // Act
         var serializedPlan1 = plan.ToJson();
@@ -434,15 +447,15 @@ public sealed class PlanSerializationTests
         Assert.Contains("\"next_step_index\":1", serializedPlan1, StringComparison.OrdinalIgnoreCase);
 
         // Act
-        cv.Set("variables", "bar");
-        cv.Update(string.Empty);
+        args["variables"] = "bar";
+        args["input"] = string.Empty;
         var nextContext = new SKContext(
             this._kernel.Object,
-            new ContextVariables(),
+            null,
             functions.Object
         );
         plan = Plan.FromJson(serializedPlan1, functions.Object);
-        plan = await kernel.Object.StepAsync(cv, plan);
+        plan = await kernel.Object.StepAsync(args, plan);
 
         // Assert
         Assert.NotNull(plan);
@@ -474,7 +487,7 @@ public sealed class PlanSerializationTests
 
         var returnContext = new SKContext(
             this._kernel.Object,
-            new ContextVariables(stepOutput),
+            new Dictionary<string, string> { ["input"] = stepOutput },
             functions.Object
         );
 
@@ -530,7 +543,7 @@ public sealed class PlanSerializationTests
 
         var returnContext = new SKContext(
             this._kernel.Object,
-            new ContextVariables(stepOutput),
+            new Dictionary<string, string> { ["input"] = stepOutput },
             functions.Object
         );
 

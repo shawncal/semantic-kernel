@@ -254,7 +254,9 @@ public sealed class Plan : IPlan
             var result = await step.InvokeAsync(functionContext, cancellationToken: cancellationToken).ConfigureAwait(false);
 
             // result.Context.Result is used for backward compatibility and can be removed in the future
+#pragma warning disable CS0618 // Type or member is obsolete
             var resultString = result.GetValue<string>() ?? result.Context.Result;
+#pragma warning restore CS0618 // Type or member is obsolete
 
             var resultValue = resultString.Trim();
 
@@ -340,7 +342,7 @@ public sealed class Plan : IPlan
             // Then filter the variables to only those needed for the next step.
             // This is done to prevent the function from having access to variables that it shouldn't.
             AddArgsToContext(this.State, context);
-            var functionVariables = this.GetNextStepArgs(context.Variables, this);
+            var functionVariables = this.GetNextStepArgs(context.Args, this);
             var functionContext = new SKContext(context.Kernel, functionVariables, context.Functions);
 
             // Execute the step
@@ -359,7 +361,9 @@ public sealed class Plan : IPlan
                 await this.InvokeNextStepAsync(context, cancellationToken).ConfigureAwait(false);
                 this.UpdateContextWithOutputs(context);
 
-                result = new FunctionResult(this.Name, this.PluginName, context, context.Result);
+                context.Args.TryGetValue("input", out var resultValue);
+
+                result = new FunctionResult(this.Name, this.PluginName, context, resultValue);
                 this.UpdateFunctionResultWithOutputs(result);
             }
         }
@@ -497,7 +501,7 @@ public sealed class Plan : IPlan
             {
                 functionResult.Metadata[output] = value;
             }
-            else if (functionResult.Context.Variables.TryGetValue(output, out var val))
+            else if (functionResult.Context.Args.TryGetValue(output, out var val))
             {
                 functionResult.Metadata[output] = val;
             }
@@ -512,7 +516,7 @@ public sealed class Plan : IPlan
     /// <param name="currentArgs">The current args.</param>
     /// <param name="step">The next step in the plan.</param>
     /// <returns>The context variables for the next step in the plan.</returns>
-    private ContextVariables GetNextStepArgs(IDictionary<string, string> currentArgs, Plan step)
+    private Dictionary<string, string> GetNextStepArgs(IDictionary<string, string> currentArgs, Plan step)
     {
         // Priority for Input
         // - Parameters (expand from variables if needed)
@@ -543,7 +547,10 @@ public sealed class Plan : IPlan
             input = this.Description;
         }
 
-        var stepVariables = new ContextVariables(input);
+        var stepVariables = new Dictionary<string, string>
+        {
+            ["input"] = input
+        };
 
         // Priority for remaining stepVariables is:
         // - Function Parameters (pull from variables or state by a key value)
@@ -552,18 +559,18 @@ public sealed class Plan : IPlan
         var functionParameters = step.Describe();
         foreach (var param in functionParameters.Parameters)
         {
-            if (param.Name.Equals(ContextVariables.MainKey, StringComparison.OrdinalIgnoreCase))
+            if (param.Name.Equals("input", StringComparison.OrdinalIgnoreCase))
             {
                 continue;
             }
 
             if (currentArgs.TryGetValue(param.Name, out string? value))
             {
-                stepVariables.Set(param.Name, value);
+                stepVariables[param.Name] = value;
             }
             else if (this.State.TryGetValue(param.Name, out value) && !string.IsNullOrEmpty(value))
             {
-                stepVariables.Set(param.Name, value);
+                stepVariables[param.Name] = value;
             }
         }
 
@@ -578,19 +585,19 @@ public sealed class Plan : IPlan
             var expandedValue = this.ExpandFromVariables(currentArgs, item.Value);
             if (!expandedValue.Equals(item.Value, StringComparison.OrdinalIgnoreCase))
             {
-                stepVariables.Set(item.Key, expandedValue);
+                stepVariables[item.Key] = expandedValue;
             }
             else if (currentArgs.TryGetValue(item.Key, out string? value))
             {
-                stepVariables.Set(item.Key, value);
+                stepVariables[item.Key] = value;
             }
             else if (this.State.TryGetValue(item.Key, out value))
             {
-                stepVariables.Set(item.Key, value);
+                stepVariables[item.Key] = value;
             }
             else
             {
-                stepVariables.Set(item.Key, expandedValue);
+                stepVariables[item.Key] = expandedValue;
             }
         }
 
@@ -598,7 +605,7 @@ public sealed class Plan : IPlan
         {
             if (!stepVariables.ContainsKey(item.Key))
             {
-                stepVariables.Set(item.Key, item.Value);
+                stepVariables[item.Key] = item.Value;
             }
         }
 

@@ -1,6 +1,6 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
-using Microsoft.SemanticKernel.Orchestration;
+using System.Collections.Generic;
 using Microsoft.SemanticKernel.Planning;
 using Xunit;
 
@@ -13,11 +13,11 @@ public sealed class PlanVariableExpansionTests
     {
         // Arrange
         var input = "Hello world!";
-        var variables = new ContextVariables();
+        var args = new Dictionary<string, string>();
         var plan = new Plan("This is my goal");
 
         // Act
-        var result = plan.ExpandFromVariables(variables, input);
+        var result = plan.ExpandFromVariables(args, input);
 
         // Assert
         Assert.Equal(input, result);
@@ -40,10 +40,10 @@ public sealed class PlanVariableExpansionTests
     public void ExpandFromVariablesWithVariablesReturnsExpandedString(string input, string expected, params string[] variables)
     {
         // Arrange
-        var contextVariables = new ContextVariables();
+        var contextVariables = new Dictionary<string, string>();
         for (var i = 0; i < variables.Length; i += 2)
         {
-            contextVariables.Set(variables[i], variables[i + 1]);
+            contextVariables[variables[i]] = variables[i + 1];
         }
 
         var plan = new Plan("This is my goal");
