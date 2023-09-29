@@ -28,6 +28,6 @@ internal static class FunctionHelpers
             context.Args[pair.Name] = pair.Value;
         }
 
-        return kernel.RunAsync(context.Variables, functions[methodName]);
+        return kernel.RunAsync(context.Args, functions[methodName]);
     }
 }

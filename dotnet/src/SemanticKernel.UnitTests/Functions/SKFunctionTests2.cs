@@ -123,7 +123,6 @@ public sealed class SKFunctionTests2
 
         // Assert
         Assert.Equal(s_expected, s_actual);
-        Assert.Equal(s_expected, context.Result);
         Assert.Equal(s_expected, result.GetValue<string>());
     }
 
@@ -172,7 +171,6 @@ public sealed class SKFunctionTests2
 
         // Assert
         Assert.Equal(s_expected, s_actual);
-        Assert.Equal("abc", context.Result);
         Assert.Equal("abc", result.GetValue<string>());
     }
 
@@ -202,7 +200,6 @@ public sealed class SKFunctionTests2
         // Assert
         Assert.Equal(1, invocationCount);
         Assert.Equal(s_expected, s_actual);
-        Assert.Equal("abc", context.Result);
         Assert.Equal("abc", result.GetValue<string>());
     }
 
@@ -232,7 +229,6 @@ public sealed class SKFunctionTests2
         // Assert
         Assert.Equal(1, invocationCount);
         Assert.Equal(s_expected, s_actual);
-        Assert.Equal(s_actual, context.Result);
         Assert.Equal(s_actual, result.GetValue<string>());
         Assert.Equal(s_expected, context.Args["canary"]);
     }
@@ -266,7 +262,6 @@ public sealed class SKFunctionTests2
         Assert.Equal(1, invocationCount);
         Assert.Equal(s_expected, s_actual);
         Assert.Equal(s_expected, context.Args["canary"]);
-        Assert.Equal("foo", context.Result);
         Assert.Equal("foo", result.GetValue<string>());
     }
 
@@ -321,7 +316,6 @@ public sealed class SKFunctionTests2
         // Assert
         Assert.Equal(1, invocationCount);
         Assert.Equal(s_expected, s_actual);
-        Assert.Equal("foo-bar", context.Result);
         Assert.Equal("foo-bar", result.GetValue<string>());
     }
 
@@ -350,7 +344,6 @@ public sealed class SKFunctionTests2
         // Assert
         Assert.Equal(1, invocationCount);
         Assert.Equal(s_expected, s_actual);
-        Assert.Equal("hello there", context.Result);
         Assert.Equal("hello there", result.GetValue<string>());
     }
 
@@ -381,7 +374,6 @@ public sealed class SKFunctionTests2
         Assert.Equal(1, invocationCount);
         Assert.Equal(s_expected, s_actual);
         Assert.Equal(s_expected, context.Args["canary"]);
-        Assert.Equal("x y z", context.Result);
         Assert.Null(result.GetValue<string>());
     }
 
@@ -412,7 +404,6 @@ public sealed class SKFunctionTests2
         Assert.Equal(1, invocationCount);
         Assert.Equal(s_expected, s_actual);
         Assert.Equal(s_expected, context.Args["canary"]);
-        Assert.Equal("x y z", context.Result);
         Assert.Null(result.GetValue<string>());
     }
 
@@ -440,7 +431,6 @@ public sealed class SKFunctionTests2
         // Assert
         Assert.Equal(s_expected, s_actual);
         Assert.Equal(s_expected, context.Args["canary"]);
-        Assert.Equal("new data", context.Result);
         Assert.Equal("new data", result.GetValue<string>());
     }
 
@@ -468,7 +458,6 @@ public sealed class SKFunctionTests2
         // Assert
         Assert.Equal(s_expected, s_actual);
         Assert.Equal(s_expected, context.Args["canary"]);
-        Assert.Equal("new data", context.Result);
         Assert.Equal("new data", result.GetValue<string>());
     }
 
@@ -485,7 +474,10 @@ public sealed class SKFunctionTests2
             // This value should overwrite "x y z". Contexts are merged.
             var newContext = new SKContext(
                 context.Kernel,
-                new ContextVariables(input),
+                new Dictionary<string, string>()
+                {
+                    ["input"] = input
+                },
                 functions: new Mock<IReadOnlyFunctionCollection>().Object);
 
             newContext.Args["input"] = "new data";
@@ -535,7 +527,7 @@ public sealed class SKFunctionTests2
             // This value should overwrite "x y z". Contexts are merged.
             var newCx = new SKContext(
                 context.Kernel,
-                new ContextVariables(input + "abc"),
+                new Dictionary<string, string> { ["input"] = input + "abc" },
                 functions: new Mock<IReadOnlyFunctionCollection>().Object);
 
             return new ValueTask<SKContext>(newCx);
@@ -989,7 +981,7 @@ public sealed class SKFunctionTests2
         static MyCustomType TestCustomType(MyCustomType instance) => instance;
 
         var context = this.MockContext("");
-        context.Variables.Set("instance", "42");
+        context.Args["instance"] = "42";
 
         var function = SKFunction.FromNativeMethod(Method(TestCustomType));
 
@@ -1051,7 +1043,7 @@ public sealed class SKFunctionTests2
     {
         return new SKContext(
             this._kernel.Object,
-            new ContextVariables(input),
+            new Dictionary<string, string> { ["input"] = input },
             functions: this._functions.Object);
     }
 }

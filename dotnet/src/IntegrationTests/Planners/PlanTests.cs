@@ -61,10 +61,12 @@ public sealed class PlanTests : IDisposable
         var plan = new Plan(emailFunctions["SendEmail"]);
 
         // Act
-        var cv = new ContextVariables();
-        cv.Update(inputToEmail);
-        cv.Set("email_address", expectedEmail);
-        var result = await target.RunAsync(cv, plan);
+        var args = new Dictionary<string, string>
+        {
+            ["input"] = inputToEmail,
+            ["email_address"] = expectedEmail
+        };
+        var result = await target.RunAsync(args, plan);
 
         // Assert
         Assert.Equal(expectedBody, result.GetValue<string>());
@@ -83,10 +85,12 @@ public sealed class PlanTests : IDisposable
         var plan = new Plan(emailFunctions["SendEmail"]);
 
         // Act
-        var cv = new ContextVariables();
-        cv.Update(inputToEmail);
-        cv.Set("email_address", expectedEmail);
-        var result = await target.RunAsync(cv, plan);
+        var args = new Dictionary<string, string>
+        {
+            ["input"] = inputToEmail,
+            ["email_address"] = expectedEmail
+        };
+        var result = await target.RunAsync(args, plan);
 
         // Assert
         Assert.Equal(expectedBody, result.GetValue<string>());
@@ -106,11 +110,13 @@ public sealed class PlanTests : IDisposable
         plan.AddSteps(writerPlugin["Translate"], emailFunctions["SendEmail"]);
 
         // Act
-        var cv = new ContextVariables();
-        cv.Update(inputToTranslate);
-        cv.Set("email_address", expectedEmail);
-        cv.Set("language", language);
-        var result = (await target.RunAsync(cv, plan)).GetValue<string>();
+        var args = new Dictionary<string, string>
+        {
+            ["input"] = inputToTranslate,
+            ["email_address"] = expectedEmail,
+            ["language"] = language
+        };
+        var result = (await target.RunAsync(args, plan)).GetValue<string>();
 
         // Assert
         Assert.NotNull(result);
@@ -156,11 +162,13 @@ public sealed class PlanTests : IDisposable
         var emailFunctions = target.ImportFunctions(new EmailPluginFake());
 
         // Create the input mapping from parent (plan) plan state to child plan (sendEmailPlan) state.
-        var cv = new ContextVariables();
-        cv.Set("email_address", "$TheEmailFromState");
+        var args = new Dictionary<string, string>
+        {
+            ["email_address"] = "$TheEmailFromState"
+        };
         var sendEmailPlan = new Plan(emailFunctions["SendEmail"])
         {
-            Parameters = cv,
+            Parameters = args,
         };
 
         var plan = new Plan(goal);
@@ -189,11 +197,13 @@ public sealed class PlanTests : IDisposable
         var emailFunctions = target.ImportFunctions(new EmailPluginFake());
 
         // Create the input mapping from parent (plan) plan state to child plan (sendEmailPlan) state.
-        var cv = new ContextVariables();
-        cv.Set("email_address", string.Empty);
+        var args = new Dictionary<string, string>
+        {
+            ["email_address"] = string.Empty
+        };
         var sendEmailPlan = new Plan(emailFunctions["SendEmail"])
         {
-            Parameters = cv,
+            Parameters = args,
         };
 
         var plan = new Plan(goal);
@@ -222,11 +232,13 @@ public sealed class PlanTests : IDisposable
         var emailFunctions = target.ImportFunctions(new EmailPluginFake());
 
         // Create the input mapping from parent (plan) plan state to child plan (sendEmailPlan) state.
-        var cv = new ContextVariables();
-        cv.Set("email_address", "$TheEmailFromState");
+        var args = new Dictionary<string, string>
+        {
+            ["email_address"] = "$TheEmailFromState"
+        };
         var sendEmailPlan = new Plan(emailFunctions["SendEmail"])
         {
-            Parameters = cv
+            Parameters = args
         };
 
         var plan = new Plan(goal);
@@ -258,36 +270,42 @@ public sealed class PlanTests : IDisposable
 
         var summarizePlan = new Plan(summarizePlugin["Summarize"]);
 
-        var cv = new ContextVariables();
-        cv.Set("language", inputLanguage);
+        var args = new Dictionary<string, string>
+        {
+            ["language"] = inputLanguage
+        };
         var outputs = new List<string>
         {
             "TRANSLATED_SUMMARY"
         };
         var translatePlan = new Plan(writerPlugin["Translate"])
         {
-            Parameters = cv,
+            Parameters = args,
             Outputs = outputs,
         };
 
-        cv = new ContextVariables();
-        cv.Update(inputName);
+        args = new Dictionary<string, string>
+        {
+            ["input"] = inputName
+        };
         outputs = new List<string>
         {
             "TheEmailFromState"
         };
         var getEmailPlan = new Plan(emailFunctions["GetEmailAddress"])
         {
-            Parameters = cv,
+            Parameters = args,
             Outputs = outputs,
         };
 
-        cv = new ContextVariables();
-        cv.Set("email_address", "$TheEmailFromState");
-        cv.Set("input", "$TRANSLATED_SUMMARY");
+        args = new Dictionary<string, string>
+        {
+            ["email_address"] = "$TheEmailFromState",
+            ["input"] = "$TRANSLATED_SUMMARY"
+        };
         var sendEmailPlan = new Plan(emailFunctions["SendEmail"])
         {
-            Parameters = cv
+            Parameters = args
         };
 
         var plan = new Plan(goal);
@@ -331,8 +349,10 @@ public sealed class PlanTests : IDisposable
 
         var summarizePlan = new Plan(summarizePlugin["Summarize"]);
 
-        var cv = new ContextVariables();
-        cv.Set("language", inputLanguage);
+        var args = new Dictionary<string, string>
+        {
+            ["language"] = inputLanguage
+        };
         var outputs = new List<string>
         {
             "TRANSLATED_SUMMARY"
@@ -340,28 +360,32 @@ public sealed class PlanTests : IDisposable
 
         var translatePlan = new Plan(writerPlugin["Translate"])
         {
-            Parameters = cv,
+            Parameters = args,
             Outputs = outputs,
         };
 
-        cv = new ContextVariables();
-        cv.Update(inputName);
+        args = new Dictionary<string, string>
+        {
+            ["input"] = inputName
+        };
         outputs = new List<string>
         {
             "TheEmailFromState"
         };
         var getEmailPlan = new Plan(emailFunctions["GetEmailAddress"])
         {
-            Parameters = cv,
+            Parameters = args,
             Outputs = outputs,
         };
 
-        cv = new ContextVariables();
-        cv.Set("email_address", "$TheEmailFromState");
-        cv.Set("input", "$TRANSLATED_SUMMARY");
+        args = new Dictionary<string, string>
+        {
+            ["email_address"] = "$TheEmailFromState",
+            ["input"] = "$TRANSLATED_SUMMARY"
+        };
         var sendEmailPlan = new Plan(emailFunctions["SendEmail"])
         {
-            Parameters = cv
+            Parameters = args
         };
 
         var plan = new Plan(goal);
@@ -391,8 +415,10 @@ public sealed class PlanTests : IDisposable
 
         var summarizePlan = new Plan(summarizePlugin["Summarize"]);
 
-        var cv = new ContextVariables();
-        cv.Set("language", inputLanguage);
+        var args = new Dictionary<string, string>
+        {
+            ["language"] = inputLanguage,
+        };
         var outputs = new List<string>
         {
             "TRANSLATED_SUMMARY"
@@ -400,28 +426,32 @@ public sealed class PlanTests : IDisposable
 
         var translatePlan = new Plan(writerPlugin["Translate"])
         {
-            Parameters = cv,
+            Parameters = args,
             Outputs = outputs,
         };
 
-        cv = new ContextVariables();
-        cv.Update(inputName);
+        args = new Dictionary<string, string>
+        {
+            ["input"] = inputName
+        };
         outputs = new List<string>
         {
             "TheEmailFromState"
         };
         var getEmailPlan = new Plan(emailFunctions["GetEmailAddress"])
         {
-            Parameters = cv,
+            Parameters = args,
             Outputs = outputs,
         };
 
-        cv = new ContextVariables();
-        cv.Set("email_address", "$TheEmailFromState");
-        cv.Set("input", "$TRANSLATED_SUMMARY");
+        args = new Dictionary<string, string>
+        {
+            ["email_address"] = "$TheEmailFromState",
+            ["input"] = "$TRANSLATED_SUMMARY"
+        };
         var sendEmailPlan = new Plan(emailFunctions["SendEmail"])
         {
-            Parameters = cv
+            Parameters = args
         };
 
         var plan = new Plan(goal);
@@ -459,11 +489,13 @@ public sealed class PlanTests : IDisposable
         plan.AddSteps(summarizePlan, translatePlan, sendEmailPlan);
 
         // Act
-        var cv = new ContextVariables();
-        cv.Update(inputToSummarize);
-        cv.Set("email_address", expectedEmail);
-        cv.Set("language", inputLanguage);
-        var result = await target.RunAsync(cv, plan);
+        var args = new Dictionary<string, string>
+        {
+            ["input"] = inputToSummarize,
+            ["email_address"] = expectedEmail,
+            ["language"] = inputLanguage
+        };
+        var result = await target.RunAsync(args, plan);
 
         // Assert
         Assert.Contains(expectedBody, result.GetValue<string>(), StringComparison.OrdinalIgnoreCase);

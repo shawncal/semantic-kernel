@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
@@ -42,7 +43,6 @@ public sealed class PlanTests
 
         // Assert
         Assert.NotNull(result);
-        Assert.Equal("Some input", result.Context.Result);
         Assert.Null(result.GetValue<string>());
     }
 
@@ -54,14 +54,16 @@ public sealed class PlanTests
         var plan = new Plan(goal);
         var kernel = new Mock<IKernel>();
 
-        var context = new SKContext(kernel.Object, new ContextVariables("Some input"));
+        var context = new SKContext(kernel.Object, new Dictionary<string, string>
+        {
+            ["input"] = "Some input"
+        });
 
         // Act
         var result = await plan.InvokeAsync(context);
 
         // Assert
         Assert.NotNull(result);
-        Assert.Equal("Some input", result.Context.Result);
         Assert.Null(result.GetValue<string>());
 
         plan = new Plan(goal);
@@ -70,7 +72,6 @@ public sealed class PlanTests
         result = await plan.InvokeAsync(context);
         // Assert
         Assert.NotNull(result);
-        Assert.Equal("other input", result.Context.Result);
         Assert.Null(result.GetValue<string>());
     }
 
@@ -86,7 +87,10 @@ public sealed class PlanTests
         // Arrange
         var kernel = new Mock<IKernel>();
 
-        var returnContext = new SKContext(kernel.Object, new ContextVariables(stepOutput));
+        var returnContext = new SKContext(kernel.Object, new Dictionary<string, string>
+        {
+            ["input"] = stepOutput
+        });
 
         var mockFunction = new Mock<ISKFunction>();
         mockFunction.Setup(x => x.InvokeAsync(It.IsAny<SKContext>(), null, It.IsAny<CancellationToken>()))
@@ -101,7 +105,6 @@ public sealed class PlanTests
 
         // Assert
         Assert.NotNull(result);
-        Assert.Equal($"{stepOutput}{planInput}", result.Context.Result);
         Assert.Equal($"{stepOutput}{planInput}", result.GetValue<string>());
         mockFunction.Verify(x => x.InvokeAsync(It.IsAny<SKContext>(), null, It.IsAny<CancellationToken>()), Times.Once);
     }
@@ -118,7 +121,7 @@ public sealed class PlanTests
         // Arrange
         var kernel = new Mock<IKernel>();
 
-        var returnContext = new SKContext(kernel.Object, new ContextVariables(stepOutput));
+        var returnContext = new SKContext(kernel.Object, new Dictionary<string, string> { ["input"] = stepOutput });
 
         var mockFunction = new Mock<ISKFunction>();
         mockFunction.Setup(x => x.InvokeAsync(It.IsAny<SKContext>(), null, It.IsAny<CancellationToken>()))
@@ -151,7 +154,7 @@ public sealed class PlanTests
         // Arrange
         var kernel = new Mock<IKernel>();
 
-        var returnContext = new SKContext(kernel.Object, new ContextVariables(stepOutput));
+        var returnContext = new SKContext(kernel.Object, new Dictionary<string, string> { ["input"] = stepOutput });
 
         var mockFunction = new Mock<ISKFunction>();
         mockFunction.Setup(x => x.InvokeAsync(It.IsAny<SKContext>(), null, It.IsAny<CancellationToken>()))
@@ -184,7 +187,7 @@ public sealed class PlanTests
         // Arrange
         var kernel = new Mock<IKernel>();
 
-        var returnContext = new SKContext(kernel.Object, new ContextVariables(stepOutput));
+        var returnContext = new SKContext(kernel.Object, new Dictionary<string, string> { ["input"] = stepOutput });
 
         var mockFunction = new Mock<ISKFunction>();
         mockFunction.Setup(x => x.InvokeAsync(It.IsAny<SKContext>(), null, It.IsAny<CancellationToken>()))
@@ -217,7 +220,7 @@ public sealed class PlanTests
         // Arrange
         var kernel = new Mock<IKernel>();
 
-        var returnContext = new SKContext(kernel.Object, new ContextVariables(stepOutput));
+        var returnContext = new SKContext(kernel.Object, new Dictionary<string, string> { ["input"] = stepOutput });
 
         var mockFunction = new Mock<ISKFunction>();
         mockFunction.Setup(x => x.InvokeAsync(It.IsAny<SKContext>(), null, It.IsAny<CancellationToken>()))
@@ -250,7 +253,7 @@ public sealed class PlanTests
         // Arrange
         var kernel = new Mock<IKernel>();
 
-        var returnContext = new SKContext(kernel.Object, new ContextVariables(stepOutput)
+        var returnContext = new SKContext(kernel.Object, new Dictionary<string, string> { ["input"] = stepOutput }
         );
 
         var mockFunction = new Mock<ISKFunction>();
@@ -290,7 +293,7 @@ public sealed class PlanTests
         // Arrange
         var kernel = new Mock<IKernel>();
 
-        var returnContext = new SKContext(kernel.Object, new ContextVariables(stepOutput));
+        var returnContext = new SKContext(kernel.Object, new Dictionary<string, string> { ["input"] = stepOutput });
 
         var mockFunction = new Mock<ISKFunction>();
         mockFunction.Setup(x => x.InvokeAsync(It.IsAny<SKContext>(), null, It.IsAny<CancellationToken>()))
@@ -308,18 +311,21 @@ public sealed class PlanTests
         plan.AddSteps(mockFunction.Object, mockFunction.Object);
 
         // Act
-        var cv = new ContextVariables(planInput);
-        cv.Set("variables", "foo");
-        plan = await kernel.Object.StepAsync(cv, plan);
+        var args = new Dictionary<string, string>
+        {
+            ["input"] = planInput,
+            ["variables"] = "foo"
+        };
+        plan = await kernel.Object.StepAsync(args, plan);
 
         // Assert
         Assert.NotNull(plan);
         Assert.Equal($"{stepOutput}{planInput}foo", plan.State.ToString());
 
         // Act
-        cv.Set("variables", "bar");
-        cv["input"] = string.Empty;
-        plan = await kernel.Object.StepAsync(cv, plan);
+        args["variables"] = "bar";
+        args["input"] = string.Empty;
+        plan = await kernel.Object.StepAsync(args, plan);
 
         // Assert
         Assert.NotNull(plan);
@@ -339,7 +345,7 @@ public sealed class PlanTests
         // Arrange
         var kernel = new Mock<IKernel>();
 
-        var returnContext = new SKContext(kernel.Object, new ContextVariables(stepOutput));
+        var returnContext = new SKContext(kernel.Object, new Dictionary<string, string> { ["input"] = stepOutput });
 
         var mockFunction = new Mock<ISKFunction>();
         mockFunction.Setup(x => x.InvokeAsync(It.IsAny<SKContext>(), null, It.IsAny<CancellationToken>()))
@@ -349,7 +355,7 @@ public sealed class PlanTests
         plan.AddSteps(mockFunction.Object, mockFunction.Object);
 
         // Act
-        var cv = new ContextVariables(planInput);
+        var cv = new Dictionary<string, string> { ["input"] = planInput };
         await Assert.ThrowsAsync<ArgumentException>(async () => await kernel.Object.StepAsync(cv, plan));
         mockFunction.Verify(x => x.InvokeAsync(It.IsAny<SKContext>(), null, It.IsAny<CancellationToken>()), Times.Once);
     }
@@ -377,8 +383,11 @@ public sealed class PlanTests
         plan.AddSteps(new Plan(mockFunction.Object), new Plan(mockFunction.Object));
 
         // Act
-        var cv = new ContextVariables(planInput);
-        await Assert.ThrowsAsync<ArgumentException>(async () => await kernel.Object.StepAsync(cv, plan));
+        var args = new Dictionary<string, string>
+        {
+            ["input"] = planInput
+        };
+        await Assert.ThrowsAsync<ArgumentException>(async () => await kernel.Object.StepAsync(args, plan));
         mockFunction.Verify(x => x.InvokeAsync(It.IsAny<SKContext>(), null, It.IsAny<CancellationToken>()), Times.Once);
     }
 

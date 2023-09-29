@@ -39,10 +39,8 @@ public class SKContextTests
         Assert.Equal("bar1", target.Args["foo1"]);
         Assert.Equal("bar2", target.Args["foo2"]);
         Assert.Equal("bar2", target.Args["foo2"]);
-        Assert.Equal(target.Args["INPUT"], target.Result);
         Assert.Equal(target.Args["INPUT"], target.ToString());
         Assert.Equal(target.Args["INPUT"], target.Args["input"]);
-        Assert.Equal(target.Args["INPUT"], target.Args.ToString());
     }
 
     [Fact]
@@ -51,7 +49,7 @@ public class SKContextTests
         // Arrange
         IDictionary<string, ISKFunction> functions = KernelBuilder.Create().ImportFunctions(new Parrot(), "test");
         this._functions.Setup(x => x.GetFunction("func")).Returns(functions["say"]);
-        var target = new SKContext(this._kernel.Object, new ContextVariables(), this._functions.Object);
+        var target = new SKContext(this._kernel.Object, null, this._functions.Object);
         Assert.NotNull(target.Functions);
 
         // Act
@@ -60,7 +58,6 @@ public class SKContextTests
         FunctionResult result = await say.InvokeAsync("ciao", this._kernel.Object);
 
         // Assert
-        Assert.Equal("ciao", result.Context.Result);
         Assert.Equal("ciao", result.GetValue<string>());
     }
 

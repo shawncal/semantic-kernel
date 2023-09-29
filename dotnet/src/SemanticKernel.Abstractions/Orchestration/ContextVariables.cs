@@ -14,6 +14,7 @@ namespace Microsoft.SemanticKernel.Orchestration;
 /// </summary>
 [DebuggerDisplay("{DebuggerDisplay,nq}")]
 [DebuggerTypeProxy(typeof(ContextVariables.TypeProxy))]
+[Obsolete("Use IDictionary<string, string> instead. This class will be removed in a future release.")]
 public sealed class ContextVariables : Dictionary<string, string>
 {
     /// <summary>
