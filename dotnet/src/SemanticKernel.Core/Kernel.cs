@@ -176,7 +176,7 @@ public sealed class Kernel : IKernel, IDisposable
     /// <inheritdoc/>
     public async Task<KernelResult> RunAsync(ContextVariables variables, CancellationToken cancellationToken, params ISKFunction[] pipeline)
     {
-        var context = new SKContext(this, variables);
+        SKContext context = new DefaultSKContext(this, variables);
 
         FunctionResult? functionResult = null;
 
@@ -239,7 +239,7 @@ repeat:
     /// <inheritdoc/>
     public SKContext CreateNewContext()
     {
-        return new SKContext(
+        return new DefaultSKContext(
             this,
             functions: this._functionCollection);
     }

@@ -224,7 +224,7 @@ public sealed class Plan : IPlan
     /// </remarks>
     public Task<Plan> RunNextStepAsync(IKernel kernel, ContextVariables variables, CancellationToken cancellationToken = default)
     {
-        var context = new SKContext(
+        var context = new DefaultSKContext(
             kernel,
             variables,
             kernel.Functions);
@@ -249,7 +249,7 @@ public sealed class Plan : IPlan
             var functionVariables = this.GetNextStepVariables(context.Variables, step);
 
             // Execute the step
-            var functionContext = new SKContext(context.Kernel, functionVariables, context.Functions);
+            var functionContext = new DefaultSKContext(context.Kernel, functionVariables, context.Functions);
 
             var result = await step.InvokeAsync(functionContext, cancellationToken: cancellationToken).ConfigureAwait(false);
 
@@ -341,7 +341,7 @@ public sealed class Plan : IPlan
             // This is done to prevent the function from having access to variables that it shouldn't.
             AddVariablesToContext(this.State, context);
             var functionVariables = this.GetNextStepVariables(context.Variables, this);
-            var functionContext = new SKContext(context.Kernel, functionVariables, context.Functions);
+            var functionContext = new DefaultSKContext(context.Kernel, functionVariables, context.Functions);
 
             // Execute the step
             result = await this.Function
